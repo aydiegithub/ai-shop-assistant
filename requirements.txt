@@ -12,7 +12,7 @@ pandas==2.2.2
 numpy==1.26.4
 
 # LLM/AI APIs (you can choose one or both depending on provider)
-openai==1.40.6     # If using OpenAI API
+openai==1.102.0    # If using OpenAI API
 google-generativeai==0.7.2  # If using Gemini API
 
 # Moderation / Validation
@@ -27,3 +27,6 @@ gunicorn==22.0.0
 # Development Utilities
 black==24.8.0       # code formatter
 pytest==8.3.3       # testing
+
+# Waiter
+tenacity

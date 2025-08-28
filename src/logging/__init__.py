@@ -4,7 +4,7 @@ from datetime import datetime
 
 class logging:
     def __init__(self, log_dir='logs'):
-        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         self.log_dir = os.path.join(root_dir, log_dir)
         os.makedirs(self.log_dir, exist_ok=True)
         log_filename = datetime.now().strftime('%Y-%m-%d_%H-%M-%S.log')
