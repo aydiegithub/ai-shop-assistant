@@ -1,11 +1,10 @@
 from .prompts import SystemInstruction, IntentConfirmation, DictionaryPresent
 from ..logging import logging
 from tenacity import retry, wait_random_exponential, stop_after_attempt
-from constants import MODEL, MODERATION_MODEL,OPENAI_API_KEY, GEMEINI_API_KEY
+from constants import MODEL, MODERATION_MODEL,OPENAI_API_KEY
 import openai
 import json
 from typing import Union, Optional, Dict
-from artifact import ModerationCheckArtifact
 
 logger = logging()
 openai.api_key = OPENAI_API_KEY
@@ -161,4 +160,9 @@ class Orchestrator:
     
     def initialise_conversation_record(self):
         logger.info("initialise_conversation_record method called.")
+        pass
+    
+    def get_laptop_lists(self):
+        logger.info("get_laptop_lists method called.")
+
         pass

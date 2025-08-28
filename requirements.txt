@@ -30,3 +30,5 @@ pytest==8.3.3       # testing
 
 # Waiter
 tenacity
+pyarrow==17.0.0
+fastparquet==2024.5.0

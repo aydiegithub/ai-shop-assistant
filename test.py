@@ -1,58 +1,63 @@
 from src.backend.orchestrator import Orchestrator
+from src.backend.product_mapper import ProductMapper
+from src.utils import read_structured_file
+import pandas as pd
 
 orch = Orchestrator()
+prodmap = ProductMapper()
 
-if __name__ == "__main__":
-    system_instruction = orch.initialise_conversation()
-    messages = [
-        system_instruction
-    ]
+# if __name__ == "__main__":
+#     system_instruction = orch.initialise_conversation()
+#     messages = [
+#         system_instruction
+#     ]
     
-    intent_confirmed_text = ''
+#     intent_confirmed_text = ''
     
-    while True:
-        user_message = input("💬 >  ")
+#     while True:
+#         user_message = input("💬 >  ")
         
-        if user_message.lower() in ["exit", "quit"]:
-            print("👋 Exiting conversation.")
-            break
+#         if user_message.lower() in ["exit", "quit"]:
+#             print("👋 Exiting conversation.")
+#             break
         
-        if orch.moderation_check(user_message) == 'flagged':
-            print('Your conversation has been flagged, restart the conversation.')
-            continue
-        messages.append({
-            'role': 'user',
-            'content': user_message
-        })
+#         if orch.moderation_check(user_message) == 'flagged':
+#             print('Your conversation has been flagged, restart the conversation.')
+#             continue
+#         messages.append({
+#             'role': 'user',
+#             'content': user_message
+#         })
 
-        assistant_response = orch.get_chat_completion(messages)
-        if orch.moderation_check(assistant_response) == 'flagged':
-            print('Your conversation has been flagged, restart the conversation.')
-            continue
+#         assistant_response = orch.get_chat_completion(messages)
+#         if orch.moderation_check(assistant_response) == 'flagged':
+#             print('Your conversation has been flagged, restart the conversation.')
+#             continue
         
-        print(assistant_response)
-        messages.append({
-            'role': 'assistant',
-            'content': assistant_response
-        })
+#         print(assistant_response)
+#         messages.append({
+#             'role': 'assistant',
+#             'content': assistant_response
+#         })
         
-        debug_confirmation = orch.intent_confirmation_check(assistant_response)
-        if (isinstance(debug_confirmation, dict) and debug_confirmation.get("result", "").lower() == "yes") \
-           or (isinstance(debug_confirmation, str) and debug_confirmation.lower() == "yes"):
-            intent_confirmed_text = orch.dictionary_present_check(assistant_response)
-            break
+#         debug_confirmation = orch.intent_confirmation_check(assistant_response)
+#         if (isinstance(debug_confirmation, dict) and debug_confirmation.get("result", "").lower() == "yes") \
+#            or (isinstance(debug_confirmation, str) and debug_confirmation.lower() == "yes"):
+#             intent_confirmed_text = orch.dictionary_present_check(assistant_response)
+#             break
         
-    print('User Profile: \n', intent_confirmed_text)
+#     print('User Profile: \n', intent_confirmed_text)
 
 
 
+# data = read_structured_file('src/database/laptop_data.csv')
+# print(data)
+# print(data.columns)
 
+# prodmap.start_product_mapping()
 
-
-
-
-
-
+data = read_structured_file('src/database/laptop_data_mapped.parquet')
+print(data)
 
 
 # debug_message = orch.initialise_conversation()
