@@ -1,6 +1,60 @@
 from src.backend.orchestrator import Orchestrator
 
 orch = Orchestrator()
+
+if __name__ == "__main__":
+    system_instruction = orch.initialise_conversation()
+    messages = [
+        system_instruction
+    ]
+    
+    intent_confirmed_text = ''
+    
+    while True:
+        user_message = input("💬 >  ")
+        
+        if user_message.lower() in ["exit", "quit"]:
+            print("👋 Exiting conversation.")
+            break
+        
+        if orch.moderation_check(user_message) == 'flagged':
+            print('Your conversation has been flagged, restart the conversation.')
+            continue
+        messages.append({
+            'role': 'user',
+            'content': user_message
+        })
+
+        assistant_response = orch.get_chat_completion(messages)
+        if orch.moderation_check(assistant_response) == 'flagged':
+            print('Your conversation has been flagged, restart the conversation.')
+            continue
+        
+        print(assistant_response)
+        messages.append({
+            'role': 'assistant',
+            'content': assistant_response
+        })
+        
+        debug_confirmation = orch.intent_confirmation_check(assistant_response)
+        if (isinstance(debug_confirmation, dict) and debug_confirmation.get("result", "").lower() == "yes") \
+           or (isinstance(debug_confirmation, str) and debug_confirmation.lower() == "yes"):
+            intent_confirmed_text = orch.dictionary_present_check(assistant_response)
+            break
+        
+    print('User Profile: \n', intent_confirmed_text)
+
+
+
+
+
+
+
+
+
+
+
+
 # debug_message = orch.initialise_conversation()
 # print(debug_message)
 
@@ -35,17 +89,18 @@ orch = Orchestrator()
 
 # print(orch.intent_confirmation_check("""You can look at this - GPU intensity: high - Display quality: low - Portability: low  - Multitasking: high - Processing speed: high - Budget: 90000"""))
 
-debug_response_assistant_n = f"""Thank you for providing your budget.
-Based on your budget of 50,000 INR, I will consider this while recommending suitable laptop options for you.
-Here is the final recommendation for your laptop:
-- GPU intensity: high
-- Display quality: high
-- Portability: low
-- Multitasking: high
-- Processing speed: medium
-- Budget: 80,000 INR
+# debug_response_assistant_n = f"""Thank you for providing your budget.
+# Based on your budget of 50,000 INR, I will consider this while recommending suitable laptop options for you.
+# Here is the final recommendation for your laptop:
+# - GPU intensity: high
+# - Display quality: high
+# - Portability: low
+# - Multitasking: high
+# - Processing speed: medium
+# - Budget: 80,000 INR
 
-Please note that these specifications are based on your requirements for surfing and a decent display within your budget.
-Let me know if there's anything else I can assist you with!"""
+# Please note that these specifications are based on your requirements for surfing and a decent display within your budget.
+# Let me know if there's anything else I can assist you with!"""
 
-print(orch.dictionary_present_check(debug_response_assistant_n))
+# print(orch.dictionary_present_check(debug_response_assistant_n))
+

@@ -29,6 +29,7 @@ class Orchestrator:
             }
             logger.info(f"Conversation initialized: {conversation}")
             return conversation
+        
         except Exception as e:
             logger.error(f"Exception in initialise_conversation: {e}")
             raise e
