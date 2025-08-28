@@ -1,4 +1,4 @@
-from .prompts import SystemInstruction, IntentConfirmation
+from .prompts import SystemInstruction, IntentConfirmation, DictionaryPresent
 from ..logging import logging
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from constants import MODEL, MODERATION_MODEL,OPENAI_API_KEY, GEMEINI_API_KEY
@@ -15,6 +15,7 @@ class Orchestrator:
         logger.info("Orchestrator instance created.")
         self.system_instruction = SystemInstruction.system_instruction
         self.intent_confirmation = IntentConfirmation.intent_confirmation
+        self.dictionary_present = DictionaryPresent.dictionary_present
 
     def initialise_conversation(self) -> str:
         """ 
@@ -124,9 +125,34 @@ class Orchestrator:
             raise
         
     
-    def dictionary_present(self):
+    def dictionary_present_check(self, input_message: str) -> Dict[str, Union[str, int, bool]]:
+        """
+        This method is used to check if the dictionary is present in the ai generated content.
+        This will help us later to query the results.
+        """
         logger.info("dictionary_present method called.")
-        pass
+        try:
+            messages = [
+                {'role': 'system', 'content': self.dictionary_present},
+                {'role': 'user', 'content': input_message}
+            ]
+            logger.info(f"Constructed messages list for dictionary check: {messages}")
+            response = openai.chat.completions.create(
+                model=MODEL,
+                messages=messages,
+                temperature=0,
+                seed=1234,
+                response_format={'type': 'json_object'}
+            )
+            logger.info(f"Raw response received from OpenAI API: {response}")
+
+            parsed = json.loads(response.choices[0].message.content)
+            logger.info(f"Parsed JSON response from dictionary check: {parsed}")
+            return parsed
+        
+        except Exception as e:
+            logger.error(f"Error in dictionary_present_check: {e}")
+            raise 
     
     def compare_laptops_with_user(self):
         logger.info("compare_laptops_with_user method called.")

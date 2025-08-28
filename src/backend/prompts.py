@@ -90,21 +90,75 @@ class IntentConfirmation:
     allowed_values = {'low','medium','high'}
     
     intent_confirmation: str = f""" 
-    You are a senior evaluator who has an eye for detail.The input text will contain a user requirement captured through 6 keys.
-    You are provided an input. You need to evaluate if the input text has the following keys:
+    You are a senior evaluator who has an eye for detail. The input text will contain user requirements captured through 6 keys, possibly with additional text.
+    
+    You need to extract and evaluate a dictionary from the input that should contain the following keys:
     {{
     'GPU intensity': 'values',
-    'Display quality':'values',
-    'Portability':'values',
-    'Multitasking':'values',
-    'Processing speed':'values',
-    'Budget':'number'
+    'Display quality': 'values',
+    'Portability': 'values',
+    'Multitasking': 'values',
+    'Processing speed': 'values',
+    'Budget': 'number'
     }}
-    The values for the keys should only be from the allowed values: {allowed_values}.
-    The 'Budget' key can take only a numerical value.
-    Next you need to evaluate if the keys have the the values filled correctly.
-    Only output a one-word string in JSON format at the key 'result' - Yes/No.
-    Thought 1 - Output a string 'Yes' if the values are correctly filled for all keys, otherwise output 'No'.
-    Thought 2 - If the answer is No, mention the reason in the key 'reason'.
-    THought 3 - Think carefully before the answering.
+    
+    EVALUATION CRITERIA:
+    1. All 6 keys must be present in the dictionary
+    2. The first 5 keys ('GPU intensity', 'Display quality', 'Portability', 'Multitasking', 'Processing speed') must have values from the allowed set: {allowed_values}
+    3. The 'Budget' key must have a numerical value (can be string representation of a number)
+    4. Ignore any additional text outside the dictionary structure
+    
+    INSTRUCTIONS:
+    - Extract the dictionary from the input text (ignore any surrounding text like "Here is the recommendation")
+    - Check if all required keys are present with correct value types
+    - Only output a JSON response with the key 'result' containing 'Yes' or 'No'
+    - If 'No', include a 'reason' key explaining what's missing or incorrect
+    
+    OUTPUT FORMAT:
+    {{"result": "Yes"}} if all criteria are met
+    {{"result": "No", "reason": "explanation"}} if any criteria fail
+    
+    Think carefully before answering and focus only on the dictionary content, not surrounding text.
+    """
+    
+
+@dataclass
+class DictionaryPresent:
+    user_req = {'GPU intensity': 'high',
+                'Display quality': 'high',
+                'Portability': 'medium',
+                'Multitasking': 'high',
+                'Processing speed': 'high',
+                'Budget': '200000'}
+        
+    dictionary_present: str = """ 
+    You are a python expert. You are provided an input.
+    You have to check if there is a python dictionary present in the string.
+    It will have the following format {user_req}.
+    Your task is to just extract the relevant values from the input and return only the python dictionary in JSON format.
+    The output should match the format as {user_req}.
+
+    {delimiter}
+    Make sure that the value of budget is also present in the user input. ###
+    The output should contain the exact keys and values as present in the input.
+    Ensure the keys and values are in the given format:
+    {{
+    'GPU intensity': 'low/medium/high ',
+    'Display quality':'low/medium/high',
+    'Portability':'low/medium/high',
+    'Multitasking':'low/medium/high',
+    'Processing speed':'low/medium/high',
+    'Budget':'numerical value'
+    }}
+    Here are some sample input output pairs for better understanding:
+    {delimiter}
+    input 1: - GPU intensity: low - Display quality: high - Portability: low - Multitasking: high - Processing speed: medium - Budget: 50,000 INR
+    output 1: {{'GPU intensity': 'low', 'Display quality': 'high', 'Portability': 'low', 'Multitasking': 'high', 'Processing speed': 'medium', 'Budget': '50000'}}
+
+    input 2: {{'GPU intensity':     'low', 'Display quality':     'low', 'Portability':    'medium', 'Multitasking': 'medium', 'Processing speed': 'low', 'Budget': '90,000'}}
+    output 2: {{'GPU intensity': 'low', 'Display quality': 'low', 'Portability': 'medium', 'Multitasking': 'medium', 'Processing speed': 'low', 'Budget': '90000'}}
+
+    input 3: Here is your user profile 'GPU intensity': 'high','Display quality': 'high','Portability': 'medium','Multitasking': 'high','Processing speed': 'high','Budget': '200000 INR'
+    output 3: {{'GPU intensity': 'high','Display quality': 'high','Portability': 'medium','Multitasking': 'high','Processing speed': 'high','Budget': '200000'}}
+    {delimiter}
     """

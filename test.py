@@ -25,12 +25,27 @@ orch = Orchestrator()
 # print(orch.moderation_check(['How to kill someone']))
 
 
-print(orch.intent_confirmation_check("""{{
-    'GPU intensity': 'low',
-    'Display quality': 'high',
-    'Portability': 'low',
-    'Multitasking': 'high',
-    'Processing speed': 'low'
-}}"""))
+# print(orch.intent_confirmation_check("""{{
+#     'GPU intensity': 'low',
+#     'Display quality': 'high',
+#     'Portability': 'low',
+#     'Multitasking': 'high',
+#     'Processing speed': 'low'
+# }}"""))
 
-print(orch.intent_confirmation_check("""Here is the recommendation {{'GPU intensity': 'low', 'Display quality': 'high', 'Portability': 'low', 'Multitasking': 'high', 'Processing speed': 'low', 'Budget': '90000'}}"""))
+# print(orch.intent_confirmation_check("""You can look at this - GPU intensity: high - Display quality: low - Portability: low  - Multitasking: high - Processing speed: high - Budget: 90000"""))
+
+debug_response_assistant_n = f"""Thank you for providing your budget.
+Based on your budget of 50,000 INR, I will consider this while recommending suitable laptop options for you.
+Here is the final recommendation for your laptop:
+- GPU intensity: high
+- Display quality: high
+- Portability: low
+- Multitasking: high
+- Processing speed: medium
+- Budget: 80,000 INR
+
+Please note that these specifications are based on your requirements for surfing and a decent display within your budget.
+Let me know if there's anything else I can assist you with!"""
+
+print(orch.dictionary_present_check(debug_response_assistant_n))
