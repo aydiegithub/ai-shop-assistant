@@ -6,6 +6,7 @@ import json
 from typing import Union, Dict
 from ..logging import logging
 from pandas import DataFrame
+import pandas as pd
 
 logger = logging()
 openai.api_key = OPENAI_API_KEY
@@ -75,15 +76,22 @@ class ProductMapper:
                 file_dir = file_path
             else:
                 logger.info(f"start_product_mapping of ProductMapper called, to read data from {file_dir}")
-            
+
             data = self.read_data(file_dir)
             logger.info("File reading was successful in start_product_mapping module.")
-            
-            data[MAPPED_COLUMN] = data[DESCRIPTION_COLUMN].map(lambda val: self.do_product_mapping(val))
+
+            if MAPPED_COLUMN in data.columns:
+                data[MAPPED_COLUMN] = data.apply(
+                    lambda row: row[MAPPED_COLUMN] if pd.notnull(row[MAPPED_COLUMN]) and row[MAPPED_COLUMN] != "" 
+                    else self.do_product_mapping(row[DESCRIPTION_COLUMN]),
+                    axis=1
+                )
+            else:
+                data[MAPPED_COLUMN] = data[DESCRIPTION_COLUMN].map(lambda val: self.do_product_mapping(val))
             logger.info("Mapping applied successfully to DESCRIPTION_COLUMN.")
-            
+
             self.write_data(data, MAPPED_DATA_FILE_PATH)
             logger.info(f"Mapped data successfully to exported to {MAPPED_DATA_FILE_PATH}.")
-            
+
         except Exception as e:
             logger.error(f"Error occured in start_product_mapping method of ProductMapper Error: {e}")
