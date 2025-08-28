@@ -2,22 +2,22 @@ from dataclasses import dataclass
 
 delimiter = "####"
 
-example_user_dict = {'GPU intensity': "high",
+@dataclass
+class SystemInstruction:
+    example_user_dict = {'GPU intensity': "high",
                     'Display quality':"high",
                     'Portability': "low",
                     'Multitasking': "high",
                     'Processing speed': "high",
                     'Budget': "150000"}
 
-example_user_req = {'GPU intensity': "_",
+    example_user_req = {'GPU intensity': "_",
                     'Display quality': "_",
                     'Portability': "_",
                     'Multitasking': "_",
                     'Processing speed': "_",
                     'Budget': "_"}
-
-@dataclass
-class SystemInstruction:
+    
     system_instruction: str = f"""
     You are an intelligent laptop gadget expert and your goal is to find the best laptop for a user.
     You need to ask relevant questions and understand the user profile by analysing the user's responses.
@@ -84,3 +84,27 @@ class SystemInstruction:
     Start with a short welcome message and encourage the user to share their requirements.
     """
     
+
+@dataclass
+class IntentConfirmation:
+    allowed_values = {'low','medium','high'}
+    
+    intent_confirmation: str = f""" 
+    You are a senior evaluator who has an eye for detail.The input text will contain a user requirement captured through 6 keys.
+    You are provided an input. You need to evaluate if the input text has the following keys:
+    {{
+    'GPU intensity': 'values',
+    'Display quality':'values',
+    'Portability':'values',
+    'Multitasking':'values',
+    'Processing speed':'values',
+    'Budget':'number'
+    }}
+    The values for the keys should only be from the allowed values: {allowed_values}.
+    The 'Budget' key can take only a numerical value.
+    Next you need to evaluate if the keys have the the values filled correctly.
+    Only output a one-word string in JSON format at the key 'result' - Yes/No.
+    Thought 1 - Output a string 'Yes' if the values are correctly filled for all keys, otherwise output 'No'.
+    Thought 2 - If the answer is No, mention the reason in the key 'reason'.
+    THought 3 - Think carefully before the answering.
+    """

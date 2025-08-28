@@ -1,4 +1,4 @@
-from .prompts import SystemInstruction
+from .prompts import SystemInstruction, IntentConfirmation
 from ..logging import logging
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from constants import MODEL, MODERATION_MODEL,OPENAI_API_KEY, GEMEINI_API_KEY
@@ -13,6 +13,8 @@ openai.api_key = OPENAI_API_KEY
 class Orchestrator:
     def __init__(self):
         logger.info("Orchestrator instance created.")
+        self.system_instruction = SystemInstruction.system_instruction
+        self.intent_confirmation = IntentConfirmation.intent_confirmation
 
     def initialise_conversation(self) -> str:
         """ 
@@ -22,7 +24,7 @@ class Orchestrator:
             logger.info("Initializing conversation with system instruction.")
             conversation = {
                 'role': 'system',
-                'content': SystemInstruction.system_instruction
+                'content': self.system_instruction
             }
             logger.info(f"Conversation initialized: {conversation}")
             return conversation
@@ -84,9 +86,43 @@ class Orchestrator:
             logger.error(f"Error occurred in moderation_check: {e}")
             raise
     
-    def intent_confirmation(self):
+    def intent_confirmation_check(self, input_message: str) -> Dict[str, Union[str, int, bool]]:
+        """ 
+        This function takes the assistant's response and evaluates if the chatbot has captured the user's profile clearly. 
+        Specifically, this checks if the following properties for the user has been captured or not
+        - GPU intensity
+        - Display quality
+        - Portability
+        - Multitasking
+        - Processing speed
+        - Budget
+        """
         logger.info("intent_confirmation method called.")
-        pass
+        logger.info(f"Input message received for intent confirmation: {input_message}")
+        try:
+            messages = [
+                {"role": "system", "content": self.intent_confirmation},
+                {"role": "user", "content": input_message}
+            ]
+            logger.info(f"Constructed messages list: {messages}")
+            logger.info("Sending intent confirmation request to OpenAI API.")
+            
+            response = openai.chat.completions.create(
+                model=MODEL,
+                messages=messages,
+                response_format={'type': 'json_object'},
+                seed=1234
+            )
+            logger.info(f"Raw response received from OpenAI API: {response}")
+            
+            response = json.loads(response.choices[0].message.content)
+            logger.info(f"Parsed JSON response: {response}")
+            return response
+        
+        except Exception as e:
+            logger.error(f"Error occurred in moderation_check: {e}")
+            raise
+        
     
     def dictionary_present(self):
         logger.info("dictionary_present method called.")
