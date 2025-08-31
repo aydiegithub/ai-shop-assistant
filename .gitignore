@@ -210,3 +210,6 @@ __marimo__/
 .venv
 AI_Shop_Assist.egg-info
 diagnostics.py
+
+# Temporary upload files
+temp_*
