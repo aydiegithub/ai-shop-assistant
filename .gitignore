@@ -209,3 +209,4 @@ __marimo__/
 .env
 .venv
 AI_Shop_Assist.egg-info
+diagnostics.py

@@ -1,9 +1,9 @@
 import boto3
-from constants import (AWS_ACCESS_KEY_ID, 
+from src.constants import (AWS_ACCESS_KEY_ID, 
                          AWS_SECRET_ACCESS_KEY, 
                          S3_BUCKET_NAME, 
                          AWS_DEFAULT_REGION)
-from ..logging import logging
+from src.logging import logging
 logger = logging()
 
 

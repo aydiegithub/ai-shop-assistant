@@ -1,10 +1,10 @@
-from .prompts import ProductMapLayer
+from src.backend.prompts import ProductMapLayer
 from constants import MODEL, OPENAI_API_KEY, PRODUCT_DETAIL_FILE, DESCRIPTION_COLUMN, MAPPED_COLUMN, MAPPED_DATA_FILE_PATH
-from ..utils import read_structured_file, write_structured_data
+from src.utils import read_structured_file, write_structured_data
 import openai
 import json
 from typing import Union, Dict
-from ..logging import logging
+from src.logging import logging
 from pandas import DataFrame
 import pandas as pd
 

@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
-from constants import D1_CONNECTION_STRING
-from ..logging import logging
+from src.constants import D1_CONNECTION_STRING
+from src.logging import logging
 
 logger = logging()
 

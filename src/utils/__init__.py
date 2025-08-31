@@ -2,7 +2,7 @@ from pandas import DataFrame
 import pandas as pd
 import os
 
-from ..logging import logging
+from src.logging import logging
 logger = logging()
 
 def read_structured_file(file_path: str = '') -> DataFrame:
