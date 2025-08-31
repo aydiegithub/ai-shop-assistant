@@ -2,138 +2,725 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CSV Upload</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Upload - AI Shop Assistant</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f9;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .drop-zone {
-            width: 400px;
-            height: 200px;
-            border: 3px dashed #4a90e2;
-            border-radius: 15px;
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #ffffff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
             padding: 20px;
-            color: #4a90e2;
-            font-size: 18px;
         }
 
-        .drop-zone:hover {
-            background-color: #f0f8ff;
-            border-color: #357ABD;
-            color: #357ABD;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        .upload-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            animation: fadeInUp 0.6s ease-out;
         }
 
-        .instructions {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #666;
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .upload-area {
+            border: 3px dashed #e2e8f0;
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+            background: #f8fafc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area.dragover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+            transform: scale(1.02);
+        }
+
+        .upload-area.file-selected {
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-area:hover .upload-icon {
+            transform: scale(1.1);
+        }
+
+        .upload-icon svg {
+            width: 32px;
+            height: 32px;
+            fill: white;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .upload-subtext {
+            color: #718096;
+            font-size: 0.9rem;
         }
 
         #fileInput {
             display: none;
         }
 
-        #uploadBtn {
+        .file-info {
             display: none;
-            margin-top: 15px;
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4a90e2;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s ease;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            animation: slideIn 0.3s ease-out;
         }
 
-        #uploadBtn:hover {
-            background-color: #357ABD;
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                height: 0;
+                padding: 0;
+            }
+            to {
+                opacity: 1;
+                height: auto;
+                padding: 20px;
+            }
+        }
+
+        .file-details {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .file-icon {
+            width: 48px;
+            height: 48px;
+            background: #48bb78;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .file-meta {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .file-size {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .progress-section {
+            display: none;
+            margin-top: 30px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .progress-title {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .progress-percentage {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .progress-status {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .logs-container {
+            background: #1a202c;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .log-entry {
+            margin-bottom: 4px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            opacity: 0;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .log-timestamp {
+            color: #718096;
+            font-size: 0.8rem;
+            min-width: 80px;
+        }
+
+        .log-message {
+            flex: 1;
+        }
+
+        .log-info .log-message { color: #90cdf4; }
+        .log-success .log-message { color: #68d391; }
+        .log-warning .log-message { color: #fac14b; }
+        .log-error .log-message { color: #fc8181; }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success-icon, .error-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-icon {
+            background: #48bb78;
+        }
+
+        .error-icon {
+            background: #f56565;
+        }
+
+        .success-icon svg, .error-icon svg {
+            width: 12px;
+            height: 12px;
+            fill: white;
+        }
+
+        .completion-status {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .completion-status.success {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            color: #276749;
+        }
+
+        .completion-status.error {
+            background: #fed7d7;
+            border: 1px solid #feb2b2;
+            color: #c53030;
+        }
+
+        @media (max-width: 640px) {
+            .upload-container {
+                padding: 24px;
+                margin: 12px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .upload-area {
+                padding: 40px 20px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Upload CSV File</h1>
-    <div class="drop-zone" id="drop-zone">
-        Drag & Drop CSV Here<br>or Click to Select File
+    <div class="upload-container">
+        <div class="header">
+            <h1>Upload CSV File</h1>
+            <p>Upload your product data for processing and analysis</p>
+        </div>
+
+        <div class="upload-area" id="upload-area">
+            <div class="upload-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                </svg>
+            </div>
+            <div class="upload-text">Drop your CSV file here</div>
+            <div class="upload-subtext">or click to select a file • Only CSV files supported</div>
+        </div>
+
+        <input type="file" id="fileInput" accept=".csv">
+
+        <div class="file-info" id="file-info">
+            <div class="file-details">
+                <div class="file-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                    </svg>
+                </div>
+                <div class="file-meta">
+                    <div class="file-name" id="file-name"></div>
+                    <div class="file-size" id="file-size"></div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="upload-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                    </svg>
+                    Start Upload
+                </button>
+                <button class="btn btn-secondary" id="cancel-btn">Cancel</button>
+            </div>
+        </div>
+
+        <div class="progress-section" id="progress-section">
+            <div class="progress-header">
+                <div class="progress-title">Processing...</div>
+                <div class="progress-percentage" id="progress-percentage">0%</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-status" id="progress-status">Preparing upload...</div>
+            
+            <div class="logs-container" id="logs-container">
+                <div class="log-entry log-info">
+                    <span class="log-timestamp">--:--:--</span>
+                    <span class="log-message">Ready to process logs...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="completion-status" id="completion-status">
+            <h3 id="completion-title"></h3>
+            <p id="completion-message"></p>
+        </div>
     </div>
-    <div class="instructions">Only CSV files are supported. After selecting, click "Upload" to send the file.</div>
-    <input type="file" id="fileInput">
-    <button id="uploadBtn">Upload</button>
 
     <script>
-        const dropZone = document.getElementById("drop-zone");
-        const fileInput = document.getElementById("fileInput");
-        const uploadBtn = document.getElementById("uploadBtn");
-        let selectedFile = null;
+        class UploadManager {
+            constructor() {
+                this.selectedFile = null;
+                this.currentSessionId = null;
+                this.eventSource = null;
+                this.progressInterval = null;
 
-        dropZone.addEventListener("click", () => fileInput.click());
-
-        dropZone.addEventListener("dragover", e => {
-            e.preventDefault();
-            dropZone.style.borderColor = "#357ABD";
-            dropZone.style.backgroundColor = "#eaf4ff";
-        });
-
-        dropZone.addEventListener("dragleave", e => {
-            dropZone.style.borderColor = "#4a90e2";
-            dropZone.style.backgroundColor = "#ffffff";
-        });
-
-        dropZone.addEventListener("drop", e => {
-            e.preventDefault();
-            dropZone.style.borderColor = "#4a90e2";
-            dropZone.style.backgroundColor = "#ffffff";
-            if (e.dataTransfer.files.length > 0) handleFileSelection(e.dataTransfer.files[0]);
-        });
-
-        fileInput.addEventListener("change", () => {
-            if (fileInput.files.length > 0) handleFileSelection(fileInput.files[0]);
-        });
-
-        uploadBtn.addEventListener("click", () => {
-            if (selectedFile) uploadFile(selectedFile);
-        });
-
-        function handleFileSelection(file) {
-            if(file.type !== "text/csv") {
-                alert("Please upload a valid CSV file.");
-                return;
+                this.initializeElements();
+                this.setupEventListeners();
             }
-            selectedFile = file;
-            uploadBtn.style.display = "block"; // Show upload button
+
+            initializeElements() {
+                this.uploadArea = document.getElementById('upload-area');
+                this.fileInput = document.getElementById('fileInput');
+                this.fileInfo = document.getElementById('file-info');
+                this.fileName = document.getElementById('file-name');
+                this.fileSize = document.getElementById('file-size');
+                this.uploadBtn = document.getElementById('upload-btn');
+                this.cancelBtn = document.getElementById('cancel-btn');
+                this.progressSection = document.getElementById('progress-section');
+                this.progressFill = document.getElementById('progress-fill');
+                this.progressPercentage = document.getElementById('progress-percentage');
+                this.progressStatus = document.getElementById('progress-status');
+                this.logsContainer = document.getElementById('logs-container');
+                this.completionStatus = document.getElementById('completion-status');
+                this.completionTitle = document.getElementById('completion-title');
+                this.completionMessage = document.getElementById('completion-message');
+            }
+
+            setupEventListeners() {
+                // File input events
+                this.uploadArea.addEventListener('click', () => this.fileInput.click());
+                this.fileInput.addEventListener('change', (e) => this.handleFileSelection(e.target.files[0]));
+
+                // Drag and drop events
+                this.uploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
+                this.uploadArea.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+                this.uploadArea.addEventListener('drop', (e) => this.handleDrop(e));
+
+                // Button events
+                this.uploadBtn.addEventListener('click', () => this.startUpload());
+                this.cancelBtn.addEventListener('click', () => this.cancelSelection());
+            }
+
+            handleDragOver(e) {
+                e.preventDefault();
+                this.uploadArea.classList.add('dragover');
+            }
+
+            handleDragLeave(e) {
+                e.preventDefault();
+                this.uploadArea.classList.remove('dragover');
+            }
+
+            handleDrop(e) {
+                e.preventDefault();
+                this.uploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.handleFileSelection(files[0]);
+                }
+            }
+
+            handleFileSelection(file) {
+                if (!file) return;
+
+                if (file.type !== 'text/csv') {
+                    this.showError('Please select a valid CSV file.');
+                    return;
+                }
+
+                this.selectedFile = file;
+                this.uploadArea.classList.add('file-selected');
+                
+                // Update file info
+                this.fileName.textContent = file.name;
+                this.fileSize.textContent = this.formatFileSize(file.size);
+                
+                // Show file info section
+                this.fileInfo.style.display = 'block';
+                
+                // Update upload area text
+                this.uploadArea.querySelector('.upload-text').textContent = 'File selected successfully';
+                this.uploadArea.querySelector('.upload-subtext').textContent = 'Ready to upload • Click "Start Upload" to begin';
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            async startUpload() {
+                if (!this.selectedFile) return;
+
+                this.uploadBtn.disabled = true;
+                this.uploadBtn.innerHTML = '<div class="spinner"></div> Uploading...';
+                
+                // Show progress section
+                this.progressSection.style.display = 'block';
+                this.clearLogs();
+
+                try {
+                    const formData = new FormData();
+                    formData.append('file', this.selectedFile);
+
+                    const response = await fetch('/upload-csv', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        this.currentSessionId = result.session_id;
+                        this.startProgressTracking();
+                        this.startLogStreaming();
+                    } else {
+                        throw new Error(result.error || 'Upload failed');
+                    }
+                } catch (error) {
+                    this.showError('Upload failed: ' + error.message);
+                    this.resetUploadState();
+                }
+            }
+
+            startProgressTracking() {
+                this.progressInterval = setInterval(async () => {
+                    try {
+                        const response = await fetch(`/upload-progress/${this.currentSessionId}`);
+                        const data = await response.json();
+
+                        this.updateProgress(data.progress, data.status, data.message);
+
+                        if (data.status === 'completed') {
+                            this.showSuccess('Upload completed successfully!', data.message);
+                            this.stopTracking();
+                        } else if (data.status === 'error') {
+                            this.showError('Upload failed', data.message);
+                            this.stopTracking();
+                        }
+                    } catch (error) {
+                        console.error('Error fetching progress:', error);
+                    }
+                }, 1000);
+            }
+
+            startLogStreaming() {
+                if (this.eventSource) {
+                    this.eventSource.close();
+                }
+
+                this.eventSource = new EventSource(`/upload-logs/${this.currentSessionId}`);
+                
+                this.eventSource.onmessage = (event) => {
+                    try {
+                        const logData = JSON.parse(event.data);
+                        
+                        if (logData.type === 'complete') {
+                            this.eventSource.close();
+                            return;
+                        }
+
+                        this.addLogEntry(logData);
+                    } catch (error) {
+                        console.error('Error parsing log data:', error);
+                    }
+                };
+
+                this.eventSource.onerror = (error) => {
+                    console.error('EventSource error:', error);
+                    this.eventSource.close();
+                };
+            }
+
+            updateProgress(progress, status, message) {
+                this.progressFill.style.width = progress + '%';
+                this.progressPercentage.textContent = progress + '%';
+                this.progressStatus.textContent = message;
+            }
+
+            addLogEntry(logData) {
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry log-${logData.type}`;
+                
+                const timestamp = document.createElement('span');
+                timestamp.className = 'log-timestamp';
+                timestamp.textContent = logData.timestamp.split(' ')[1];
+                
+                const message = document.createElement('span');
+                message.className = 'log-message';
+                message.textContent = logData.message;
+                
+                logEntry.appendChild(timestamp);
+                logEntry.appendChild(message);
+                
+                this.logsContainer.appendChild(logEntry);
+                this.logsContainer.scrollTop = this.logsContainer.scrollHeight;
+            }
+
+            clearLogs() {
+                this.logsContainer.innerHTML = '';
+            }
+
+            showSuccess(title, message) {
+                this.completionStatus.className = 'completion-status success';
+                this.completionStatus.style.display = 'block';
+                this.completionTitle.textContent = title;
+                this.completionMessage.textContent = message;
+            }
+
+            showError(title, message = '') {
+                this.completionStatus.className = 'completion-status error';
+                this.completionStatus.style.display = 'block';
+                this.completionTitle.textContent = title;
+                this.completionMessage.textContent = message;
+            }
+
+            stopTracking() {
+                if (this.progressInterval) {
+                    clearInterval(this.progressInterval);
+                    this.progressInterval = null;
+                }
+                if (this.eventSource) {
+                    this.eventSource.close();
+                    this.eventSource = null;
+                }
+            }
+
+            cancelSelection() {
+                this.selectedFile = null;
+                this.fileInfo.style.display = 'none';
+                this.uploadArea.classList.remove('file-selected');
+                this.uploadArea.querySelector('.upload-text').textContent = 'Drop your CSV file here';
+                this.uploadArea.querySelector('.upload-subtext').textContent = 'or click to select a file • Only CSV files supported';
+                this.fileInput.value = '';
+                this.resetUploadState();
+            }
+
+            resetUploadState() {
+                this.uploadBtn.disabled = false;
+                this.uploadBtn.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                    </svg>
+                    Start Upload
+                `;
+                this.stopTracking();
+            }
         }
 
-        function uploadFile(file){
-            const formData = new FormData();
-            formData.append("file", file);
-
-            fetch("/upload-csv", { method: "POST", body: formData })
-                .then(res => res.json())
-                .then(data => alert(JSON.stringify(data)))
-                .catch(err => alert("Error uploading file: " + err));
-        }
+        // Initialize the upload manager when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new UploadManager();
+        });
     </script>
 </body>
 </html>
