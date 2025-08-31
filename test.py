@@ -56,8 +56,8 @@ prodmap = ProductMapper()
 
 # prodmap.start_product_mapping()
 
-data = read_structured_file('src/database/laptop_data_mapped.parquet')
-print(data)
+# data = read_structured_file('src/database/laptop_data_mapped.parquet')
+# print(data)
 
 
 # debug_message = orch.initialise_conversation()
@@ -108,4 +108,3 @@ print(data)
 # Let me know if there's anything else I can assist you with!"""
 
 # print(orch.dictionary_present_check(debug_response_assistant_n))
-
