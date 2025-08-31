@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from src.database.aws_s3_connection import AWSConnection
-from src.database.update_d1_database import D1DataBaseUpdate
+from database.aiven_posgresql_update import PostgresDataBaseUpdate
 from src.constants import S3_FILE_NAME
 from src.logging import logging
 from src.backend.product_mapper import ProductMapper
@@ -12,7 +12,7 @@ class DataIngestion():
     def __init__(self):
         self.aws_connection = AWSConnection()
         self.product_mapper = ProductMapper()
-        self.update_d1_database = D1DataBaseUpdate()
+        self.update_postgres_database = PostgresDataBaseUpdate()
     
     # --- Start of Fix ---
     # The method signature now correctly accepts both 'local_file_path' and 's3_file_name'
@@ -40,7 +40,7 @@ class DataIngestion():
             
             # 4. Update the D1 Database
             logger.info("Updating D1 database with data from DataFrame.")
-            self.update_d1_database.update_to_d1_database(df=df)
+            self.update_postgres_database.update_to_postgres_database(df=df)
             logger.info("D1 database updated successfully.")
             
             logger.info("Data ingestion process completed successfully.")
