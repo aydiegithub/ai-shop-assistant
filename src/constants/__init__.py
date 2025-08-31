@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 MODEL = "gpt-4o-mini"
+# MODEL = 'gpt-3.5-turbo'
 # MODEL = "gemini-2.5-flash"
 
 MODERATION_MODEL = "omni-moderation-latest"
@@ -39,3 +40,6 @@ POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
 POSTGRES_HOST = os.getenv('POSTGRES_HOST')
 POSTGRES_PORT = os.getenv('POSTGRES_PORT')
 POSTGRES_TABLE_NAME = os.getenv('POSTGRES_TABLE_NAME')
+
+# Columns for Query Engine
+COLUMN_NAMES_FOR_QUERY_ENGINE = ['Brand', 'Model Name', 'Price', 'Description', MAPPED_COLUMN]

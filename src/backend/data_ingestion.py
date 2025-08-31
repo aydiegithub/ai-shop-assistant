@@ -5,6 +5,7 @@ from database.aiven_posgresql_update import PostgresDataBaseUpdate
 from src.constants import S3_FILE_NAME
 from src.logging import logging
 from src.backend.product_mapper import ProductMapper
+from src.utils import read_structured_file
 
 logger = logging()
 
@@ -30,7 +31,7 @@ class DataIngestion():
             
             # 2. Read the local file into a DataFrame
             logger.info(f"Reading '{local_file_path}' into DataFrame.")
-            df = pd.read_csv(local_file_path)
+            df = read_structured_file(local_file_path)
             logger.info("CSV file loaded into DataFrame successfully.")
             
             # 3. Map the product descriptions

@@ -1,7 +1,10 @@
 from src.backend.prompts import SystemInstruction, IntentConfirmation, DictionaryPresent
+from src.backend.data_ingestion import DataIngestion
 from src.logging import logging
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from src.constants import MODEL, MODERATION_MODEL, OPENAI_API_KEY
+from src.constants import PRODUCT_DETAIL_FILE, S3_FILE_NAME
+from src.database.load_from_database import LoadFromDatabase
 import openai
 import json
 from typing import Union, Optional, Dict
@@ -15,6 +18,8 @@ class Orchestrator:
         self.system_instruction = SystemInstruction.system_instruction
         self.intent_confirmation = IntentConfirmation.intent_confirmation
         self.dictionary_present = DictionaryPresent.dictionary_present
+        self.load_from_db = LoadFromDatabase()
+        self.data_ingestor = DataIngestion()
 
     def initialise_conversation(self) -> str:
         """ 
@@ -161,12 +166,32 @@ class Orchestrator:
         logger.info("[initialise_conversation_record] initialise_conversation_record method called.")
         pass
     
-    def start_data_ingestion(self):
-        pass
+    def start_internal_data_ingestion(self, local_file_path: str = PRODUCT_DETAIL_FILE, s3_file_name: str = S3_FILE_NAME):
+        """ 
+        This method starts data ingestion updates AWS S3 bucket and then creates laptop profile dictionary
+        in Aiven postgress sql automatically.
+        """
+        try:
+            logger.info("[start_internal_data_ingestion] start_internal_data_ingestion method called.")
+            self.data_ingestor.start_data_ingestion(local_file_path=local_file_path, 
+                                                    s3_file_name=s3_file_name)
+            logger.info("[start_internal_data_ingestion] Data ingestion completed successfully.")
+        except Exception as e:
+            logger.error(f"[start_internal_data_ingestion] Error occurred in start_internal_data_ingestion: {e}")
+            raise
     
     def get_laptop_lists(self):
-        logger.info("[get_laptop_lists] get_laptop_lists method called.")
-        pass
+        """ 
+        This method loads mapped data from PostgreSQL database for querying best laptop to the user.
+        """
+        try:
+            logger.info("[get_laptop_lists] get_laptop_lists method called.")
+            data_from_db = self.load_from_db.fetch_query_engine_data()
+            logger.info("[get_laptop_lists] Data loaded from database successfully.")
+            return data_from_db
+        except Exception as e:
+            logger.error(f"[get_laptop_lists] Error occurred in get_laptop_lists: {e}")
+            raise
     
     def route_to_human_agent(self):
         logger.info("[route_to_human_agent] route_to_human_agent method called.")
