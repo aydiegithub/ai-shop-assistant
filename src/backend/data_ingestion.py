@@ -4,6 +4,7 @@ from database.aws_s3_connection import AWSConnection
 from database.update_d1_database import update_d1_database
 from constants import S3_FILE_NAME
 from ..logging import logging
+from .product_mapper import ProductMapper
 
 logger = logging()
 
@@ -28,6 +29,10 @@ class DataIngestion():
             # Load CSV into DataFrame as-is
             df = pd.read_csv(local_file)
             logger.info("CSV file loaded into DataFrame successfully.")
+            
+            logger.info("Starting product mapping.")
+            df = ProductMapper.start_dataframe_product_mapping(df)
+            logger.info("Product mapping has been acheived successfully.")
             
             logger.info("Updating D1 database with data from DataFrame.")
             # Push DataFrame to D1 database

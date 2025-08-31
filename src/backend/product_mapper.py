@@ -95,3 +95,33 @@ class ProductMapper:
 
         except Exception as e:
             logger.error(f"Error occured in start_product_mapping method of ProductMapper Error: {e}")
+            
+    
+    def start_dataframe_product_mapping(self, df: DataFrame = None):
+        """
+        This method maps product description in a new column named mapped_column in the provided DataFrame.
+        If no DataFrame is provided, it reads from PRODUCT_DETAIL_FILE.
+        """
+        try:
+            # If no DataFrame is passed, read from the file
+            if df is None:
+                logger.info("[start_dataframe_product_mapping] No DataFrame provided.")
+                df = self.read_data(PRODUCT_DETAIL_FILE)
+            else:
+                logger.info("[start_dataframe_product_mapping] DataFrame provided directly for mapping.")
+
+            if MAPPED_COLUMN in df.columns:
+                df[MAPPED_COLUMN] = df.apply(
+                    lambda row: row[MAPPED_COLUMN] if pd.notnull(row[MAPPED_COLUMN]) and row[MAPPED_COLUMN] != ""
+                    else self.do_product_mapping(row[DESCRIPTION_COLUMN]),
+                    axis=1
+                )
+            else:
+                df[MAPPED_COLUMN] = df[DESCRIPTION_COLUMN].map(lambda val: self.do_product_mapping(val))
+                logger.info("Mapping applied successfully to DESCRIPTION_COLUMN in DataFrame.")
+
+            return df
+
+        except Exception as e:
+            logger.error(f"Error occurred in [start_dataframe_product_mapping] method of ProductMapper: {e}")
+            raise
