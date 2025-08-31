@@ -20,12 +20,20 @@ class D1DataBaseUpdate:
         Drops the existing table, creates a new one based on the DataFrame's schema,
         and inserts all data in a single batch transaction.
         """
+        
+        # First, validate credentials (moved to the beginning)
         if not all([CLOUDFLARE_ACCOUNT_ID, D1_SQL_DATABASE_ID, CLOUDFLARE_API_TOKEN]):
             error_msg = "Cloudflare credentials (CLOUDFLARE_ACCOUNT_ID, D1_SQL_DATABASE_ID, CLOUDFLARE_API_TOKEN) are not set."
             logger.error(error_msg)
             raise ValueError(error_msg)
+        
+        # Validate DataFrame
+        if df is None or df.empty:
+            error_msg = "DataFrame is None or empty"
+            logger.error(error_msg)
+            raise ValueError(error_msg)
 
-        # Correct API endpoint
+        # Set up API endpoint and headers (moved before usage)
         api_url = f"https://api.cloudflare.com/client/v4/accounts/{CLOUDFLARE_ACCOUNT_ID}/d1/databases/{D1_SQL_DATABASE_ID}/query"
         headers = {
             "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
@@ -33,6 +41,8 @@ class D1DataBaseUpdate:
         }
         
         try:
+            logger.info(f"Starting D1 database update for table: {table_name}")
+            
             # 1. Drop the existing table
             drop_table_sql = f"DROP TABLE IF EXISTS `{table_name}`;"
             
@@ -78,7 +88,20 @@ class D1DataBaseUpdate:
 
             logger.info(f"Sending batch request to D1 API to update table: {table_name}")
 
-            response = requests.post(api_url, headers=headers, data=json.dumps(payload))
+            # Make the API request
+            response = requests.post(api_url, headers=headers, json=payload)
+            
+            # Enhanced error handling
+            if response.status_code == 404:
+                logger.error(f"Database not found. Check your D1_SQL_DATABASE_ID: {D1_SQL_DATABASE_ID}")
+                raise ValueError("Database not found - verify your database ID")
+            elif response.status_code == 401:
+                logger.error("Unauthorized - check your API token permissions")
+                raise ValueError("API token unauthorized")
+            elif response.status_code == 403:
+                logger.error("Forbidden - API token doesn't have required permissions")
+                raise ValueError("API token forbidden - check permissions")
+            
             response.raise_for_status()
 
             results = response.json()
@@ -88,10 +111,12 @@ class D1DataBaseUpdate:
                 raise Exception(f"D1 API Error: {results.get('errors')}")
 
             logger.info(f"Successfully updated D1 table: {table_name}")
+            logger.info(f"API Response: {results}")
 
         except requests.exceptions.RequestException as e:
             logger.error(f"HTTP Request failed: {e}")
-            if e.response is not None:
+            if hasattr(e, 'response') and e.response is not None:
+                logger.error(f"Response status code: {e.response.status_code}")
                 logger.error(f"Response from server: {e.response.text}")
             raise
 

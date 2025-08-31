@@ -2,138 +2,685 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CSV Upload</title>
+    <title>AI Shop Assistant - CSV Upload</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f9;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
+            padding: 20px;
         }
 
-        h1 {
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
             color: #333;
-            margin-bottom: 20px;
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
         }
 
         .drop-zone {
-            width: 400px;
-            height: 200px;
-            border: 3px dashed #4a90e2;
+            width: 100%;
+            min-height: 200px;
+            border: 3px dashed #667eea;
             border-radius: 15px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: #ffffff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
             cursor: pointer;
             transition: all 0.3s ease;
-            text-align: center;
             padding: 20px;
-            color: #4a90e2;
-            font-size: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-zone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .drop-zone:hover::before {
+            left: 100%;
         }
 
         .drop-zone:hover {
-            background-color: #f0f8ff;
-            border-color: #357ABD;
-            color: #357ABD;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            border-color: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
         }
 
-        .instructions {
+        .drop-zone.dragover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            transform: scale(1.02);
+        }
+
+        .drop-zone.file-attached {
+            border-color: #4ade80;
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, rgba(34, 197, 94, 0.1) 100%);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .drop-zone:hover .upload-icon {
+            transform: scale(1.1);
+            color: #764ba2;
+        }
+
+        .upload-text {
+            color: #667eea;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .file-info {
+            display: none;
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid #4ade80;
+            border-radius: 10px;
+            padding: 15px;
             margin-top: 15px;
-            font-size: 14px;
+            text-align: left;
+        }
+
+        .file-info.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .file-name {
+            color: #22c55e;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .file-size {
             color: #666;
+            font-size: 0.9em;
         }
 
         #fileInput {
             display: none;
         }
 
-        #uploadBtn {
+        .upload-btn {
             display: none;
-            margin-top: 15px;
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4a90e2;
-            color: #fff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border: none;
-            border-radius: 8px;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            min-width: 150px;
         }
 
-        #uploadBtn:hover {
-            background-color: #357ABD;
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .upload-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .upload-btn.show {
+            display: inline-block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Progress Section */
+        .progress-section {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .progress-section.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .progress-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .progress-percentage {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .progress-message {
+            color: #666;
+            font-size: 0.95em;
+            text-align: left;
+        }
+
+        /* Status Indicator */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-indicator.idle {
+            background: rgba(156, 163, 175, 0.1);
+            color: #6b7280;
+        }
+
+        .status-indicator.uploading {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .status-indicator.processing {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .status-indicator.completed {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .status-indicator.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        /* Console Section */
+        .console-section {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .console-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .console-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .console-clear {
+            background: none;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #667eea;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .console-clear:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .console {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            line-height: 1.4;
+        }
+
+        .console-line {
+            margin-bottom: 8px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .console-timestamp {
+            color: #888;
+            font-size: 0.8em;
+            min-width: 70px;
+        }
+
+        .console-message {
+            flex: 1;
+        }
+
+        .console-line.error .console-message {
+            color: #ff6b6b;
+        }
+
+        .console-line.info .console-message {
+            color: #00ff00;
+        }
+
+        .console-line.warning .console-message {
+            color: #ffa500;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .drop-zone {
+                min-height: 150px;
+            }
+
+            .console {
+                height: 200px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Upload CSV File</h1>
-    <div class="drop-zone" id="drop-zone">
-        Drag & Drop CSV Here<br>or Click to Select File
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Shop Assistant</h1>
+            <p>Upload your CSV file to train the AI with product data</p>
+        </div>
+
+        <div class="upload-section">
+            <div class="drop-zone" id="drop-zone">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Drop your CSV file here</div>
+                <div class="upload-subtext">or click to browse files</div>
+            </div>
+            
+            <div class="file-info" id="file-info">
+                <div class="file-name" id="file-name"></div>
+                <div class="file-size" id="file-size"></div>
+            </div>
+            
+            <input type="file" id="fileInput" accept=".csv">
+            <button class="upload-btn" id="uploadBtn">🚀 Start Processing</button>
+        </div>
+
+        <div class="progress-section" id="progress-section">
+            <div class="progress-header">
+                <div class="progress-title">Processing Status</div>
+                <div class="progress-percentage" id="progress-percentage">0%</div>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-message" id="progress-message">Initializing...</div>
+            <div class="status-indicator idle" id="status-indicator">
+                <span>⚪</span>
+                <span id="status-text">Ready</span>
+            </div>
+        </div>
+
+        <div class="console-section">
+            <div class="console-header">
+                <div class="console-title">📋 Process Logs</div>
+                <button class="console-clear" onclick="clearConsole()">Clear</button>
+            </div>
+            <div class="console" id="console">
+                <div class="console-line info">
+                    <span class="console-timestamp">[READY]</span>
+                    <span class="console-message">System ready for file upload...</span>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="instructions">Only CSV files are supported. After selecting, click "Upload" to send the file.</div>
-    <input type="file" id="fileInput">
-    <button id="uploadBtn">Upload</button>
 
     <script>
+        // DOM Elements
         const dropZone = document.getElementById("drop-zone");
         const fileInput = document.getElementById("fileInput");
         const uploadBtn = document.getElementById("uploadBtn");
-        let selectedFile = null;
+        const fileInfo = document.getElementById("file-info");
+        const fileName = document.getElementById("file-name");
+        const fileSize = document.getElementById("file-size");
+        const progressSection = document.getElementById("progress-section");
+        const progressBar = document.getElementById("progress-bar");
+        const progressPercentage = document.getElementById("progress-percentage");
+        const progressMessage = document.getElementById("progress-message");
+        const statusIndicator = document.getElementById("status-indicator");
+        const statusText = document.getElementById("status-text");
+        const console = document.getElementById("console");
 
+        // State
+        let selectedFile = null;
+        let uploadInterval = null;
+
+        // Event Listeners
         dropZone.addEventListener("click", () => fileInput.click());
 
         dropZone.addEventListener("dragover", e => {
             e.preventDefault();
-            dropZone.style.borderColor = "#357ABD";
-            dropZone.style.backgroundColor = "#eaf4ff";
+            dropZone.classList.add("dragover");
         });
 
         dropZone.addEventListener("dragleave", e => {
-            dropZone.style.borderColor = "#4a90e2";
-            dropZone.style.backgroundColor = "#ffffff";
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
         });
 
         dropZone.addEventListener("drop", e => {
             e.preventDefault();
-            dropZone.style.borderColor = "#4a90e2";
-            dropZone.style.backgroundColor = "#ffffff";
-            if (e.dataTransfer.files.length > 0) handleFileSelection(e.dataTransfer.files[0]);
+            dropZone.classList.remove("dragover");
+            if (e.dataTransfer.files.length > 0) {
+                handleFileSelection(e.dataTransfer.files[0]);
+            }
         });
 
         fileInput.addEventListener("change", () => {
-            if (fileInput.files.length > 0) handleFileSelection(fileInput.files[0]);
+            if (fileInput.files.length > 0) {
+                handleFileSelection(fileInput.files[0]);
+            }
         });
 
         uploadBtn.addEventListener("click", () => {
             if (selectedFile) uploadFile(selectedFile);
         });
 
+        // Functions
         function handleFileSelection(file) {
-            if(file.type !== "text/csv") {
-                alert("Please upload a valid CSV file.");
+            if (file.type !== "text/csv") {
+                addToConsole("ERROR", "Please upload a valid CSV file.", "error");
                 return;
             }
+
             selectedFile = file;
-            uploadBtn.style.display = "block"; // Show upload button
+            
+            // Update UI
+            dropZone.classList.add("file-attached");
+            dropZone.querySelector(".upload-icon").textContent = "✅";
+            dropZone.querySelector(".upload-text").textContent = "File Ready";
+            dropZone.querySelector(".upload-subtext").textContent = "Click upload to start processing";
+            
+            // Show file info
+            fileName.textContent = `📄 ${file.name}`;
+            fileSize.textContent = `📊 Size: ${formatFileSize(file.size)}`;
+            fileInfo.classList.add("show");
+            
+            // Show upload button
+            uploadBtn.classList.add("show");
+            
+            addToConsole("INFO", `File selected: ${file.name} (${formatFileSize(file.size)})`, "info");
         }
 
-        function uploadFile(file){
+        function uploadFile(file) {
             const formData = new FormData();
             formData.append("file", file);
 
+            // Reset and show progress
+            progressSection.classList.add("show");
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = "⏳ Processing...";
+
+            addToConsole("INFO", "Starting file upload...", "info");
+
             fetch("/upload-csv", { method: "POST", body: formData })
                 .then(res => res.json())
-                .then(data => alert(JSON.stringify(data)))
-                .catch(err => alert("Error uploading file: " + err));
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    addToConsole("INFO", "Upload initiated successfully", "info");
+                    startProgressPolling();
+                })
+                .catch(err => {
+                    addToConsole("ERROR", `Upload failed: ${err.message}`, "error");
+                    resetUploadState();
+                });
         }
+
+        function startProgressPolling() {
+            uploadInterval = setInterval(() => {
+                fetch("/upload-status")
+                    .then(res => res.json())
+                    .then(data => {
+                        updateProgress(data);
+                        if (data.status === "completed" || data.status === "error") {
+                            clearInterval(uploadInterval);
+                            resetUploadState();
+                        }
+                    })
+                    .catch(err => {
+                        addToConsole("ERROR", `Status check failed: ${err.message}`, "error");
+                        clearInterval(uploadInterval);
+                        resetUploadState();
+                    });
+            }, 1000);
+        }
+
+        function updateProgress(data) {
+            // Update progress bar
+            progressBar.style.width = `${data.progress}%`;
+            progressPercentage.textContent = `${data.progress}%`;
+            progressMessage.textContent = data.message;
+
+            // Update status indicator
+            statusIndicator.className = `status-indicator ${data.status}`;
+            
+            const statusIcons = {
+                idle: "⚪",
+                uploading: "⬆️",
+                processing: "⚙️",
+                completed: "✅",
+                error: "❌"
+            };
+
+            const statusTexts = {
+                idle: "Ready",
+                uploading: "Uploading",
+                processing: "Processing",
+                completed: "Completed",
+                error: "Error"
+            };
+
+            statusIndicator.querySelector("span").textContent = statusIcons[data.status] || "⚪";
+            statusText.textContent = statusTexts[data.status] || "Unknown";
+
+            // Add recent logs to console
+            if (data.logs && data.logs.length > 0) {
+                data.logs.forEach(log => {
+                    if (!document.querySelector(`[data-timestamp="${log.timestamp}"]`)) {
+                        addToConsole(log.level.toUpperCase(), log.message, log.level, log.timestamp);
+                    }
+                });
+            }
+        }
+
+        function resetUploadState() {
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = "🚀 Start Processing";
+            
+            // Reset file selection
+            setTimeout(() => {
+                dropZone.classList.remove("file-attached");
+                dropZone.querySelector(".upload-icon").textContent = "📁";
+                dropZone.querySelector(".upload-text").textContent = "Drop your CSV file here";
+                dropZone.querySelector(".upload-subtext").textContent = "or click to browse files";
+                fileInfo.classList.remove("show");
+                uploadBtn.classList.remove("show");
+                selectedFile = null;
+                fileInput.value = "";
+            }, 3000);
+        }
+
+        function addToConsole(level, message, cssClass = "info", timestamp = null) {
+            const time = timestamp || new Date().toLocaleTimeString();
+            const line = document.createElement("div");
+            line.className = `console-line ${cssClass}`;
+            line.setAttribute("data-timestamp", time);
+            line.innerHTML = `
+                <span class="console-timestamp">[${time}]</span>
+                <span class="console-message">${message}</span>
+            `;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            console.innerHTML = `
+                <div class="console-line info">
+                    <span class="console-timestamp">[READY]</span>
+                    <span class="console-message">Console cleared. System ready...</span>
+                </div>
+            `;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Initialize console with welcome message
+        addToConsole("INFO", "AI Shop Assistant CSV Upload System initialized", "info");
+        addToConsole("INFO", "Ready to accept CSV files for processing", "info");
     </script>
 </body>
 </html>
