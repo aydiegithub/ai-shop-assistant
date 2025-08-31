@@ -17,7 +17,17 @@ DESCRIPTION_COLUMN = 'Description'
 MAPPED_COLUMN = 'mapped_dictionary'
 MAPPED_DATA_FILE_PATH = 'src/database/laptop_data_mapped.parquet'
 
-# Cloudflare D1 SQL Database
+# Cloudflare D1 SQL Database Credentials
 CLOUDFLARE_ACCOUNT_ID = os.getenv('CLOUDFLARE_ACCOUNT_ID')
 D1_SQL_DATABASE_ID = os.getenv('D1_SQL_DATABASE_ID')
 CLOUDFLARE_API_TOKEN = os.getenv('CLOUDFLARE_API_TOKEN')
+D1_SQL_DATABASE_NAME = os.getenv('D1_SQL_DATABASE_NAME')
+D1_CONNECTION_STRING = f"d1://{CLOUDFLARE_API_TOKEN}@{CLOUDFLARE_ACCOUNT_ID}/{D1_SQL_DATABASE_NAME}"
+D1_TABLE_NAME = 'laptops'
+
+# AWS Credentials
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_DEFAULT_REGION = os.getenv('AWS_DEFAULT_REGION')
+S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
+S3_FILE_NAME = 'laptop_data.csv'

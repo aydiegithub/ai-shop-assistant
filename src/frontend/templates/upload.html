@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV Upload</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone {
+            width: 400px;
+            height: 200px;
+            border: 3px dashed #4a90e2;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            padding: 20px;
+            color: #4a90e2;
+            font-size: 18px;
+        }
+
+        .drop-zone:hover {
+            background-color: #f0f8ff;
+            border-color: #357ABD;
+            color: #357ABD;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        .instructions {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        #uploadBtn {
+            display: none;
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        #uploadBtn:hover {
+            background-color: #357ABD;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload CSV File</h1>
+    <div class="drop-zone" id="drop-zone">
+        Drag & Drop CSV Here<br>or Click to Select File
+    </div>
+    <div class="instructions">Only CSV files are supported. After selecting, click "Upload" to send the file.</div>
+    <input type="file" id="fileInput">
+    <button id="uploadBtn">Upload</button>
+
+    <script>
+        const dropZone = document.getElementById("drop-zone");
+        const fileInput = document.getElementById("fileInput");
+        const uploadBtn = document.getElementById("uploadBtn");
+        let selectedFile = null;
+
+        dropZone.addEventListener("click", () => fileInput.click());
+
+        dropZone.addEventListener("dragover", e => {
+            e.preventDefault();
+            dropZone.style.borderColor = "#357ABD";
+            dropZone.style.backgroundColor = "#eaf4ff";
+        });
+
+        dropZone.addEventListener("dragleave", e => {
+            dropZone.style.borderColor = "#4a90e2";
+            dropZone.style.backgroundColor = "#ffffff";
+        });
+
+        dropZone.addEventListener("drop", e => {
+            e.preventDefault();
+            dropZone.style.borderColor = "#4a90e2";
+            dropZone.style.backgroundColor = "#ffffff";
+            if (e.dataTransfer.files.length > 0) handleFileSelection(e.dataTransfer.files[0]);
+        });
+
+        fileInput.addEventListener("change", () => {
+            if (fileInput.files.length > 0) handleFileSelection(fileInput.files[0]);
+        });
+
+        uploadBtn.addEventListener("click", () => {
+            if (selectedFile) uploadFile(selectedFile);
+        });
+
+        function handleFileSelection(file) {
+            if(file.type !== "text/csv") {
+                alert("Please upload a valid CSV file.");
+                return;
+            }
+            selectedFile = file;
+            uploadBtn.style.display = "block"; // Show upload button
+        }
+
+        function uploadFile(file){
+            const formData = new FormData();
+            formData.append("file", file);
+
+            fetch("/upload-csv", { method: "POST", body: formData })
+                .then(res => res.json())
+                .then(data => alert(JSON.stringify(data)))
+                .catch(err => alert("Error uploading file: " + err));
+        }
+    </script>
+</body>
+</html>
