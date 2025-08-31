@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MODEL = "gpt-3.5-turbo"
+MODEL = "gpt-4o-mini"
 # MODEL = "gemini-2.5-flash"
 
 MODERATION_MODEL = "omni-moderation-latest"
