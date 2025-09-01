@@ -1,4 +1,3 @@
-from src.backend.orchestrator import Orchestrator
 from src.logging import logging
 from pandas import DataFrame
 from src.constants import BUDGET_COLUMN
@@ -7,7 +6,6 @@ from typing import List, Dict
 import re
 
 logger = logging()
-orch = Orchestrator()
 
 class QueryEngine():
     def __init__(self):

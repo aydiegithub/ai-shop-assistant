@@ -4,7 +4,7 @@ from src.backend.query_engine import QueryEngine
 from src.backend.prompts import ProductRecommender
 from typing import List, Dict, Union
 from src.logging import logging
-from constants import DESCRIPTION_COLUMN, BUDGET_COLUMN, OPENAI_API_KEY, MODEL
+from src.constants import DESCRIPTION_COLUMN, BUDGET_COLUMN, OPENAI_API_KEY, MODEL
 import openai
 
 openai.api_key = OPENAI_API_KEY
@@ -24,7 +24,7 @@ class ProductRecommendation():
         try:
             logger.info("[calculate_score] calculate_score method called.")
             product_mapper = ProductMapper()
-            mapped_result = product_mapper.map_the_score(mapping_column)
+            mapped_result = product_mapper.map_the_score(mapping_column, user_profile=user_profile)
             logger.info("[calculate_score] Score calculation completed successfully.")
             return mapped_result
         except Exception as e:
