@@ -152,7 +152,7 @@ class ProductMapper:
             if not user_profile or len(user_profile) == 0:
                 raise ValueError("User profile must be provided with at least one dictionary.")
 
-            user_pref = user_profile[0]
+            user_pref = user_profile['user_req']
 
             for record in mapped_column:
                 scored_record = {}

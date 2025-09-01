@@ -127,19 +127,6 @@ class Orchestrator:
             
             response = json.loads(response.choices[0].message.content)
             logger.info(f"[intent_confirmation_check] Parsed JSON response: {response}")
-            
-            if response['result'].lower() == 'yes':
-                logger.info("[intent_confirmation_check] User intent confirmed. Extracting user profile.")
-                self.user_profile = self.set_user_profile(message=input_message)
-                logger.info(f"[intent_confirmation_check] User profile set: {self.user_profile}")
-                recommender = ProductRecommendation()
-                try:
-                    recommended_products = recommender.recommend_product(self.user_profile)
-                    logger.info(f"[intent_confirmation_check] Recommended products: {recommended_products}")
-                    return recommended_products
-                except Exception as rec_err:
-                    logger.error(f"[intent_confirmation_check] Error during product recommendation: {rec_err}")
-                    raise rec_err
                             
             return response
         
@@ -147,12 +134,35 @@ class Orchestrator:
             logger.error(f"[intent_confirmation_check] Error occurred in intent_confirmation_check: {e}")
             raise
     
-    def set_user_profile(self, message: str) -> Dict[str, Union[str, int]]:
+    def start_product_recommendation(self, input_message: str) -> str:
+        """
+        This method is used to start product recommendation.
+        It will return top 3 results as response.
+        """
+        try:
+            logger.info("Entered [start_product_recommendation] because [intent_confirmation_check] User intent confirmed.")
+            logger.info("Extracting user profile.")
+            self.user_profile = self.set_user_profile(message=input_message)
+            logger.info(f"[start_product_recommendation] User profile set: {self.user_profile}")
+            recommender = ProductRecommendation()
+            recommended_products = recommender.recommend_product(self.user_profile)
+            logger.info(f"[start_product_recommendation] Recommended products: {recommended_products}")
+            return recommended_products
+        except Exception as rec_err:
+            logger.error(f"[start_product_recommendation] Error during product recommendation: {rec_err}")
+            raise rec_err
+    
+    def set_user_profile(self, message: Union[str, Dict[str, Union[str, int]]]) -> Dict[str, Union[str, int]]:
         """ 
         This method is used to get user profile.
         """
         try:
             logger.info("[set_user_profile] set_user_profile method called.")
+
+            if isinstance(message, dict):
+                logger.info(f"[set_user_profile] Message is already a dictionary: {message}")
+                return message
+
             text = message
             match = re.search(r"\{.*\}", text, re.DOTALL)
             

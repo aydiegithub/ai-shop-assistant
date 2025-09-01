@@ -46,4 +46,4 @@ boto3>=1.26.0,<2
 cloudflare>=3.0.0,<4  
 
 # For SQL
-psycopg2
+psycopg2==2.9.10

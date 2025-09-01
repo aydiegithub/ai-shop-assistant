@@ -1,11 +1,12 @@
-from src.backend.orchestrator import Orchestrator
 from src.backend.product_mapper import ProductMapper
 from src.backend.query_engine import QueryEngine
 from src.backend.prompts import ProductRecommender
+from src.database.load_from_database import LoadFromDatabase
 from typing import List, Dict, Union
 from src.logging import logging
 from src.constants import DESCRIPTION_COLUMN, BUDGET_COLUMN, OPENAI_API_KEY, MODEL
 import openai
+from pandas import DataFrame
 
 openai.api_key = OPENAI_API_KEY
 logger = logging()
@@ -13,9 +14,22 @@ logger = logging()
 class ProductRecommendation():
     def __init__(self):
         logger.info("ProductRecommendation class instansiated.")
-        self.orch = Orchestrator()
         self.query_engine = QueryEngine()
         self.system_message = ProductRecommender.system_message
+        self.load_from_db = LoadFromDatabase()
+    
+    def get_laptop_lists(self) -> DataFrame:
+        """ 
+        This method loads mapped data from PostgreSQL database for querying best laptop to the user.
+        """
+        try:
+            logger.info("[get_laptop_lists] get_laptop_lists method called.")
+            data_from_db = self.load_from_db.fetch_query_engine_data()
+            logger.info("[get_laptop_lists] Data loaded from database successfully.")
+            return data_from_db
+        except Exception as e:
+            logger.error(f"[get_laptop_lists] Error occurred in get_laptop_lists: {e}")
+            raise
     
     def calculate_score(self, mapping_column: List[Dict] = None, user_profile: List[Dict] = None) -> List[int]:
         """ 
@@ -38,8 +52,9 @@ class ProductRecommendation():
         """
         try:
             logger.info("[recommend_product] recommend_product method called.")
-            database_data = self.orch.get_laptop_lists()
-            budget = user_profile['Budget']
+            database_data = self.get_laptop_lists()
+            logger.info(f"User Profile = {user_profile}")
+            budget = user_profile['user_req']['Budget']
             filtered_data_by_budget = self.query_engine.filter_budget(data=database_data, 
                                                                       criteria=budget)
             mapped_data_by_score = self.query_engine.filter_by_user_score(data=filtered_data_by_budget,
@@ -49,7 +64,7 @@ class ProductRecommendation():
             
             recommendation_message = [
                 {'role': 'system', 'content': self.system_message},
-                {'role': 'user', 'content': top_3_product}
+                {'role': 'user', 'content': f"Here are the top 3 recommended laptops:\n{top_3_product}"}
             ]
             
             recommended_products = openai.chat.completions.create(

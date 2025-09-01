@@ -4,6 +4,7 @@ from src.constants import BUDGET_COLUMN
 from src.backend.product_mapper import ProductMapper
 from typing import List, Dict
 import re
+import pandas as pd
 
 logger = logging()
 
@@ -18,27 +19,36 @@ class QueryEngine():
             criteria = This is the filter option, example Price <= 55000;
         """
         try:
-            logger.info("filter_budget called with criteria: %s", criteria)
+            logger.info(f"filter_budget called with criteria {criteria}")
             budget = 0
             if criteria:
                 match = re.search(r"\d[\d,]*", criteria)
                 if match:
                     budget = int(match.group().replace(",", ""))
-                    logger.info("Extracted budget from criteria: %d", budget)
+                    logger.info(f"Extracted budget from criteria: {budget}")
                 else:
                     budget = data[BUDGET_COLUMN].median()
-                    logger.info("No budget found in criteria, using median: %d", budget)
+                    logger.info(f"No budget found in criteria, using median: {budget}")
             else:
                 budget = data[BUDGET_COLUMN].median()
-                logger.info("No criteria provided, using median: %d", budget)
+                logger.info(f"No criteria provided, using median: {budget}")
 
-            logger.info("Starting budget filtering with budget: %d", budget)
+            # Clean budget column (remove non-digits) and convert to integers
+            data[BUDGET_COLUMN] = (
+                data[BUDGET_COLUMN]
+                .astype(str)
+                .str.replace(r"[^0-9]", "", regex=True)
+            )
+            data[BUDGET_COLUMN] = pd.to_numeric(data[BUDGET_COLUMN], errors="coerce").fillna(0).astype(int)
+
+            logger.info(f"Starting budget filtering with budget: {budget}")
+            
             data = data[data[BUDGET_COLUMN] <= int(budget)]
-            logger.info("Budget filtering completed successfully. Filtered rows: %d", len(data))
+            logger.info(f"Budget filtering completed successfully. Filtered rows: {len(data)}")
             return data
 
         except Exception as e:
-            logger.error("Error during budget filtering: %s", str(e))
+            logger.error(f"Error during budget filtering: {e}")
             raise
         
     def filter_by_user_score(self, data: DataFrame = None, user_profile: List[Dict] = None) -> DataFrame:
