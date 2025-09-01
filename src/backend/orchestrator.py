@@ -22,6 +22,7 @@ class Orchestrator:
         self.system_instruction = SystemInstruction.system_instruction
         self.intent_confirmation = IntentConfirmation.intent_confirmation
         self.dictionary_present = DictionaryPresent.dictionary_present
+        self.filter_json = FilterJson.system_instruction
         self.load_from_db = LoadFromDatabase()
         self.data_ingestor = DataIngestion()
 
@@ -209,10 +210,6 @@ class Orchestrator:
             logger.error(f"[dictionary_present_check] Error in dictionary_present_check: {e}")
             raise
     
-    # def initialise_conversation_record(self):
-    #     logger.info("[initialise_conversation_record] initialise_conversation_record method called.")
-    #     pass
-    
     def start_internal_data_ingestion(self, local_file_path: str = PRODUCT_DETAIL_FILE, s3_file_name: str = S3_FILE_NAME):
         """ 
         This method starts data ingestion updates AWS S3 bucket and then creates laptop profile dictionary
@@ -278,4 +275,30 @@ class Orchestrator:
             
         except Exception as e:
             logger.error(f"[route_to_human_agent] Error occurred: {e}")
+            raise
+        
+        
+    def filter_json_from_response(self, input_message: str = None) -> str:
+        """ 
+        This method removes unwanted json response from the assistance response.
+        """
+        try:
+            logger.info("Entered [filter_response_from_json] method, checking for unwanted charecters.")
+            messages = [
+                {'role': 'system', 'content': self.filter_json},
+                {'role': 'user', 'content': input_message}
+            ]
+            
+            response = openai.chat.completions.create(
+                messages=messages,
+                model=MODEL,
+                temperature=0
+            )
+            
+            response = response.choices[0].message.content
+            logger.info(f"Filtered message: {response}")
+            return response
+            
+        except Exception as e:
+            logger.error(f"[filter_response_from_json] error occured Error: {e}")
             raise

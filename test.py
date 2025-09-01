@@ -31,9 +31,9 @@ if __name__ == '__main__':
             print('\nYour conversation has been flagged, restart the conversation.')
             continue
 
-        # Only print if not a dict
-        if not isinstance(assistant_response, dict):
-            print("\nShopAssist Bot 🤖: ", assistant_response)
+        assistant_response_filtered = orch.filter_json_from_response(assistant_response)
+        print("\nShopAssist Bot 🤖: ", assistant_response_filtered)
+        
         messages.append({
             'role': 'assistant', 'content': assistant_response
         })

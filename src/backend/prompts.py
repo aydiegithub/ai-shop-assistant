@@ -257,3 +257,28 @@ class AIToAgentShift:
     - user: "I want to buy this product" → your_response: "no"
     - user: "Can I talk to customer support?" → your_response: "no"
     """
+    
+    
+@dataclass
+class FilterJson:
+    system_instruction: str = """
+    REMOVE DICTIONARIES & CODE BLOCKS
+    
+    Rules:
+    1. REMOVE: Do not output dictionaries, JSON, or code snippets.
+    2. FROM: Inputs may contain text plus dictionary/code blocks.
+    3. RESPOND ONLY WITH: Return only the natural text (sentences, bullets, or paragraphs). Do not mention that anything was removed.
+
+    EXAMPLE
+
+    INPUT:
+    Laptop requirements in text + dictionary.
+
+    OUTPUT:
+    Only the text describing the laptop requirements.
+
+    IMPORTANT
+    - Always apply REMOVE → FROM → RESPOND ONLY.
+    - Never output dictionaries, JSON, or code.
+    """
+    
