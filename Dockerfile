@@ -1,5 +1,4 @@
-# Use an official Python runtime as a parent image provided by AWS for Lambda
-FROM public.ecr.aws/lambda/python:3.12.11
+FROM public.ecr.aws/lambda/python:3.9
 
 WORKDIR /var/task
 
@@ -9,7 +8,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Arguments that can be passed in during the build process from the CI/CD workflow
 ARG OPENAI_API_KEY
 ARG GEMINI_API_KEY
 ARG CLOUDFLARE_ACCOUNT_ID
