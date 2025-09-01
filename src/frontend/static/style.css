@@ -1,0 +1,593 @@
+/* CSS Variables for brand colors */
+:root {
+    --aydie-blue: #1F1247;
+    --aydie-lime: #C9E975;
+    --bg: #FFFFFF;
+    --text-secondary: #666666;
+    --border-color: #e1e5e9;
+    --shadow-light: 0 2px 8px rgba(31, 18, 71, 0.08);
+    --shadow-medium: 0 4px 16px rgba(31, 18, 71, 0.12);
+    --border-radius: 12px;
+    --border-radius-small: 8px;
+    --transition-fast: 0.2s ease;
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: #f5f7fa;
+    color: var(--aydie-blue);
+    line-height: 1.6;
+    padding: 1rem;
+    min-height: 100vh;
+}
+
+/* Main container */
+.main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    height: calc(100vh - 2rem);
+    min-height: 700px;
+}
+
+.app-card {
+    background: var(--bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-medium);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    height: 100%;
+    max-height: calc(100vh - 2rem);
+}
+
+/* Info panel (left side) */
+.info-panel {
+    background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+    border-right: 1px solid var(--border-color);
+    padding: 2rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.info-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.info-content h2 {
+    color: var(--aydie-blue);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.info-text {
+    flex: 1;
+}
+
+.info-text p {
+    margin-bottom: 1rem;
+    color: var(--aydie-blue);
+    font-size: 0.95rem;
+}
+
+.info-text strong {
+    font-weight: 600;
+    color: var(--aydie-blue);
+}
+
+.info-text a {
+    color: var(--aydie-blue);
+    text-decoration: underline;
+    text-decoration-color: var(--aydie-lime);
+    text-underline-offset: 2px;
+    transition: var(--transition-fast);
+}
+
+.info-text a:hover {
+    color: var(--aydie-blue);
+    text-decoration-color: var(--aydie-blue);
+}
+
+.info-text a:focus {
+    outline: 2px solid var(--aydie-lime);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Logo section */
+.logo-section {
+    margin-top: auto;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+
+.logo-link {
+    display: inline-block;
+    transition: var(--transition-fast);
+    border-radius: var(--border-radius-small);
+    padding: 0.5rem;
+}
+
+.logo-link:hover {
+    transform: translateY(-2px);
+    background: rgba(201, 233, 117, 0.1);
+}
+
+.logo-link:focus {
+    outline: 2px solid var(--aydie-lime);
+    outline-offset: 2px;
+}
+
+.aydie-logo {
+    height: 40px;
+    width: auto;
+    display: block;
+    transition: var(--transition-fast);
+    filter: brightness(1);
+}
+
+.logo-link:hover .aydie-logo {
+    filter: brightness(1.1);
+}
+
+/* Chat panel (right side) */
+.chat-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0; /* Important for flex child */
+}
+
+.chat-header {
+    padding: 1.5rem 2rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background: var(--bg);
+    flex-shrink: 0;
+}
+
+.chat-title-section h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--aydie-blue);
+    margin-bottom: 0.25rem;
+}
+
+.demo-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: normal;
+    margin: 0;
+}
+
+.clear-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    align-self: flex-start;
+}
+
+.clear-btn:hover {
+    background: #f8f9fa;
+    border-color: var(--aydie-blue);
+    color: var(--aydie-blue);
+}
+
+.clear-btn:focus {
+    outline: 2px solid var(--aydie-lime);
+    outline-offset: 2px;
+}
+
+/* Messages container */
+.messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    scroll-behavior: smooth;
+    min-height: 0; /* Important for flex child */
+}
+
+.message {
+    max-width: 85%;
+    word-wrap: break-word;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-content {
+    padding: 0.875rem 1.125rem;
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Bold and italic text styling */
+.message-content strong {
+    font-weight: 600;
+    color: var(--aydie-blue);
+}
+
+.message-content em {
+    font-style: italic;
+}
+
+/* Links in messages */
+.message-content a {
+    color: var(--aydie-blue);
+    text-decoration: underline;
+    text-decoration-color: var(--aydie-lime);
+    text-underline-offset: 2px;
+    transition: var(--transition-fast);
+}
+
+.message-content a:hover {
+    text-decoration-color: var(--aydie-blue);
+}
+
+/* User messages */
+.user-message {
+    align-self: flex-end;
+}
+
+.user-message .message-content {
+    background: var(--aydie-lime);
+    color: var(--aydie-blue);
+    border-bottom-right-radius: 4px;
+}
+
+.user-message .message-content strong {
+    color: var(--aydie-blue);
+    font-weight: 700;
+}
+
+/* Bot messages */
+.bot-message {
+    align-self: flex-start;
+}
+
+.bot-message .message-content {
+    background: #f8f9fa;
+    color: var(--aydie-blue);
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: 4px;
+}
+
+.bot-message .message-content strong {
+    color: var(--aydie-blue);
+    font-weight: 600;
+}
+
+.welcome-message {
+    margin-bottom: 1rem;
+}
+
+/* Typing indicator */
+.typing-indicator {
+    padding: 0 2rem;
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    flex-shrink: 0;
+}
+
+.typing-indicator.visible {
+    display: flex;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.typing-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    animation: typing-bounce 1.5s infinite;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.typing-text {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+@keyframes typing-bounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    30% {
+        transform: translateY(-8px);
+        opacity: 1;
+    }
+}
+
+/* Chat input form */
+.chat-input-form {
+    padding: 1rem 2rem 2rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg);
+    flex-shrink: 0;
+}
+
+.input-container {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+}
+
+#message-input {
+    flex: 1;
+    min-height: 44px;
+    max-height: 120px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-family: var(--font-family);
+    font-size: 0.95rem;
+    resize: none;
+    transition: var(--transition-fast);
+    line-height: 1.5;
+}
+
+#message-input:focus {
+    outline: none;
+    border-color: var(--aydie-lime);
+    box-shadow: 0 0 0 3px rgba(201, 233, 117, 0.2);
+}
+
+#message-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.send-btn {
+    background: var(--aydie-lime);
+    border: none;
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 44px;
+    color: var(--aydie-blue);
+}
+
+.send-btn:hover:not(:disabled) {
+    background: #b8d95f;
+    transform: translateY(-1px);
+}
+
+.send-btn:focus {
+    outline: 2px solid var(--aydie-blue);
+    outline-offset: 2px;
+}
+
+.send-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Toast notifications */
+#toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.toast {
+    background: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-medium);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    animation: toast-slide-in 0.3s ease;
+    max-width: 400px;
+}
+
+.toast-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.toast button {
+    background: transparent;
+    border: 1px solid #c33;
+    color: #c33;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: var(--transition-fast);
+}
+
+.toast button:hover {
+    background: #c33;
+    color: white;
+}
+
+@keyframes toast-slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Accessibility: Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .messages-container {
+        scroll-behavior: auto;
+    }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 1024px) {
+    .app-card {
+        grid-template-columns: 350px 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 0.5rem;
+    }
+    
+    .main-container {
+        height: calc(100vh - 1rem);
+    }
+    
+    .app-card {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        max-height: calc(100vh - 1rem);
+    }
+    
+    .info-panel {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.5rem;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .info-content h2 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
+    
+    .info-text {
+        font-size: 0.875rem;
+    }
+    
+    .logo-section {
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .aydie-logo {
+        height: 32px;
+    }
+    
+    .chat-header {
+        padding: 1rem 1.5rem 0.75rem;
+        align-items: center;
+    }
+    
+    .chat-title-section h1 {
+        font-size: 1.125rem;
+    }
+    
+    .demo-subtitle {
+        font-size: 0.8rem;
+    }
+    
+    .messages-container {
+        padding: 1rem 1.5rem;
+    }
+    
+    .chat-input-form {
+        padding: 1rem 1.5rem 1.5rem;
+    }
+    
+    .input-container {
+        gap: 0.5rem;
+    }
+    
+    .message {
+        max-width: 95%;
+    }
+    
+    #toast-container {
+        top: 0.5rem;
+        right: 0.5rem;
+        left: 0.5rem;
+    }
+    
+    .toast {
+        max-width: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-text p {
+        font-size: 0.8rem;
+    }
+    
+    .message-content {
+        font-size: 0.875rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    .aydie-logo {
+        height: 28px;
+    }
+}

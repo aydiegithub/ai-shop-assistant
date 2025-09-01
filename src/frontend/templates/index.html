@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Shop Assistant - Aydie</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script defer src="{{ url_for('static', filename='main.js') }}"></script>
+</head>
+<body>
+    <!-- Toast notification area for errors -->
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+    
+    <!-- Main container -->
+    <div class="main-container">
+        <div class="app-card">
+            
+            <!-- Left panel: About section -->
+            <div class="info-panel">
+                <div class="info-content">
+                    <h2>About this demo</h2>
+                    <div class="info-text">
+                        <p>This my portfolio project, this uses OpenAI API.</p>
+                        <p>If this demo stops working then my API credit has been exhausted, since I am a college student I can't afford to run this on large scale.</p>
+                        <p><strong>For source code visit:</strong> <a href="https://github.com/aydiegithub/ai-shop-assistant.git" target="_blank" rel="noopener noreferrer">github.com/aydiegithub/ai-shop-assistant.git</a></p>
+                        <p><strong>Documentation:</strong> <a href="https://aydie.in/llm/ai-shop-assistant-documentation.pdf" target="_blank" rel="noopener noreferrer">aydie.in/llm/ai-shop-assistant-documentation.pdf</a></p>
+                        <p><strong>Website:</strong> <a href="https://www.aydie.in" target="_blank" rel="noopener noreferrer">www.aydie.in</a></p>
+                        <p><strong>My blogs:</strong> <a href="https://blogs.aydie.in" target="_blank" rel="noopener noreferrer">blogs.aydie.in</a></p>
+                        <p><strong>All projects:</strong> <a href="https://aydie.in/projects" target="_blank" rel="noopener noreferrer">aydie.in/projects</a></p>
+                        <p><strong>LinkedIn:</strong> <a href="https://linkedin.com/in/aydiemusic" target="_blank" rel="noopener noreferrer">linkedin.com/in/aydiemusic</a></p>
+                        <p><strong>Email:</strong> <a href="mailto:developer@aydie.in">developer@aydie.in</a> or <a href="mailto:aditya@aydie.in">aditya@aydie.in</a></p>
+                    </div>
+                    
+                    <!-- Logo section -->
+                    <div class="logo-section">
+                        <a href="https://www.aydie.in" target="_blank" rel="noopener noreferrer" class="logo-link" aria-label="Visit Aydie website">
+                            <img src="https://aydie.in/assets/img/logo_header_blue.svg" alt="Aydie Logo" class="aydie-logo">
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right panel: Chat interface -->
+            <div class="chat-panel">
+                <div class="chat-header">
+                    <h1>Shop Assist Bot</h1>
+                    <p style="font-size: 1.01em; font-weight: normal;">Laptop related only since it is a demo.</p>
+                    <button id="clear-chat-btn" class="clear-btn" aria-label="Clear conversation">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                        </svg>
+                        Clear
+                    </button>
+                </div>
+                
+                <!-- Messages container -->
+                <div id="messages-container" class="messages-container" aria-live="polite" aria-label="Chat messages">
+                    <div class="welcome-message">
+                        <div class="message bot-message">
+                            <div class="message-content">
+                                Welcome! I'm your AI shopping assistant. Tell me what laptop you're looking for and I'll help you find the perfect product.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Typing indicator -->
+                <div id="typing-indicator" class="typing-indicator" aria-hidden="true">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <span class="typing-text">Bot is typing...</span>
+                </div>
+                
+                <!-- Input form -->
+                <form id="chat-form" class="chat-input-form">
+                    <div class="input-container">
+                        <textarea 
+                            id="message-input" 
+                            placeholder="Type your message here... (Enter to send, Shift+Enter for new line)"
+                            rows="1"
+                            aria-label="Message input"
+                            required
+                        ></textarea>
+                        <button 
+                            type="submit" 
+                            id="send-btn" 
+                            class="send-btn"
+                            aria-label="Send message"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22,2 15,22 11,13 2,9"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

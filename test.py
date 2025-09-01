@@ -1,5 +1,8 @@
 from src.backend.orchestrator import Orchestrator
 import warnings
+import openai
+from src.constants import OPENAI_API_KEY, MODEL
+openai.api_key = OPENAI_API_KEY
 warnings.filterwarnings('ignore')
 
 orch = Orchestrator()
@@ -13,12 +16,35 @@ if __name__ == '__main__':
         print("\n")
         user_message = input("Chat 💬 >  ")
         
+        if len(messages) == 1:  # first user message
+            prompt = (
+                f"Check if the following message is either a greeting or a request for help. "
+                f"Consider possible spelling mistakes or typos. "
+                f"Respond only with 'yes' if it is a greeting/request for help, or 'no' otherwise. "
+                f"Message: '{user_message}'"
+            )
+            response = openai.chat.completions.create(
+                model=MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0
+            )
+            greeting_result = response.choices[0].message.content.strip().lower()
+            if greeting_result == "yes":
+                assistant_message = (
+                    "Hello there! I am here to help you. I am your personal laptop assistant. "
+                    "What kind of laptop are you looking for?"
+                )
+                messages.append({'role': 'assistant', 'content': assistant_message})
+                print("\nShopAssist Bot 🤖: ", assistant_message)
+                continue
+        
         if user_message.lower() in ["exit", "quit"]:
             print("\n👋 Exiting conversation.")
             break
         
         if orch.moderation_check(user_message) == 'flagged':
             print('\nYour conversation has been flagged, restart the conversation.')
+            messages = [messages[0]]
             continue
         
         messages.append({
@@ -29,6 +55,7 @@ if __name__ == '__main__':
         assistant_response = orch.get_chat_completion(messages)
         if orch.moderation_check(assistant_response) == 'flagged':
             print('\nYour conversation has been flagged, restart the conversation.')
+            messages = [messages[0]]
             continue
 
         assistant_response_filtered = orch.filter_json_from_response(assistant_response)
