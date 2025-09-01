@@ -1,13 +1,16 @@
-from src.backend.prompts import SystemInstruction, IntentConfirmation, DictionaryPresent
+from src.backend.prompts import *
 from src.backend.data_ingestion import DataIngestion
+from src.backend.product_recommender import ProductRecommendation
 from src.logging import logging
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from src.constants import MODEL, MODERATION_MODEL, OPENAI_API_KEY
 from src.constants import PRODUCT_DETAIL_FILE, S3_FILE_NAME
 from src.database.load_from_database import LoadFromDatabase
+from pandas import DataFrame
 import openai
 import json
 from typing import Union, Optional, Dict
+import re, ast
 
 logger = logging()
 openai.api_key = OPENAI_API_KEY
@@ -15,6 +18,7 @@ openai.api_key = OPENAI_API_KEY
 class Orchestrator:
     def __init__(self):
         logger.info("[__init__] Orchestrator instance created.")
+        self.user_profile = dict()
         self.system_instruction = SystemInstruction.system_instruction
         self.intent_confirmation = IntentConfirmation.intent_confirmation
         self.dictionary_present = DictionaryPresent.dictionary_present
@@ -123,10 +127,47 @@ class Orchestrator:
             
             response = json.loads(response.choices[0].message.content)
             logger.info(f"[intent_confirmation_check] Parsed JSON response: {response}")
+            
+            if response['result'].lower() == 'yes':
+                logger.info("[intent_confirmation_check] User intent confirmed. Extracting user profile.")
+                self.user_profile = self.set_user_profile(message=input_message)
+                logger.info(f"[intent_confirmation_check] User profile set: {self.user_profile}")
+                recommender = ProductRecommendation()
+                try:
+                    recommended_products = recommender.recommend_product(self.user_profile)
+                    logger.info(f"[intent_confirmation_check] Recommended products: {recommended_products}")
+                    return recommended_products
+                except Exception as rec_err:
+                    logger.error(f"[intent_confirmation_check] Error during product recommendation: {rec_err}")
+                    raise rec_err
+                            
             return response
         
         except Exception as e:
             logger.error(f"[intent_confirmation_check] Error occurred in intent_confirmation_check: {e}")
+            raise
+    
+    def set_user_profile(self, message: str) -> Dict[str, Union[str, int]]:
+        """ 
+        This method is used to get user profile.
+        """
+        try:
+            logger.info("[set_user_profile] set_user_profile method called.")
+            text = message
+            match = re.search(r"\{.*\}", text, re.DOTALL)
+            
+            if match:
+                extracted = match.group(0)
+                logger.info(f"[set_user_profile] Extracted dictionary string: {extracted}")
+                dictionary = ast.literal_eval(extracted)
+                logger.info(f"[set_user_profile] Parsed dictionary: {dictionary}")
+                return dictionary
+            else:
+                logger.info("[set_user_profile] No dictionary found in message.")
+                return {}
+            
+        except Exception as e:
+            logger.error(f"[set_user_profile] Error occurred in set_user_profile: {e}")
             raise
         
     def dictionary_present_check(self, input_message: str) -> Dict[str, Union[str, int, bool]]:
@@ -156,15 +197,11 @@ class Orchestrator:
         
         except Exception as e:
             logger.error(f"[dictionary_present_check] Error in dictionary_present_check: {e}")
-            raise 
+            raise
     
-    def compare_laptops_with_user(self):
-        logger.info("[compare_laptops_with_user] compare_laptops_with_user method called.")
-        pass
-    
-    def initialise_conversation_record(self):
-        logger.info("[initialise_conversation_record] initialise_conversation_record method called.")
-        pass
+    # def initialise_conversation_record(self):
+    #     logger.info("[initialise_conversation_record] initialise_conversation_record method called.")
+    #     pass
     
     def start_internal_data_ingestion(self, local_file_path: str = PRODUCT_DETAIL_FILE, s3_file_name: str = S3_FILE_NAME):
         """ 
@@ -180,7 +217,7 @@ class Orchestrator:
             logger.error(f"[start_internal_data_ingestion] Error occurred in start_internal_data_ingestion: {e}")
             raise
     
-    def get_laptop_lists(self):
+    def get_laptop_lists(self) -> DataFrame:
         """ 
         This method loads mapped data from PostgreSQL database for querying best laptop to the user.
         """
@@ -193,6 +230,42 @@ class Orchestrator:
             logger.error(f"[get_laptop_lists] Error occurred in get_laptop_lists: {e}")
             raise
     
-    def route_to_human_agent(self):
-        logger.info("[route_to_human_agent] route_to_human_agent method called.")
-        pass
+    def route_to_human_agent(self, input_message: str = 'yes') -> str:
+        """ 
+        This method redirects user to Human-Agent if the user is not satisfied with the response
+        """
+        try:
+            logger.info("[route_to_human_agent] route_to_human_agent method called.")
+            ai_to_agent_system_instruction = AIToAgentShift.system_instruction
+            
+            messages = [
+                {'role': 'system', 'content': ai_to_agent_system_instruction},
+                {'role': 'user', 'content': input_message}
+            ]
+            
+            logger.info(f"[route_to_human_agent] Sending messages to OpenAI API: {messages}")
+            response = openai.chat.completions.create(
+                messages=messages,
+                model=MODEL,
+                temperature=0
+            )
+            
+            ai_reply = response.choices[0].message.content.strip().lower()
+            logger.info(f"[route_to_human_agent] AI reply received: {ai_reply}")
+
+            if ai_reply == "yes":
+                logger.info("[route_to_human_agent] User satisfied, asking for rating.")
+                return (
+                    "Thank you for your interest! I'm glad I could assist you.\n"
+                    "Would you mind rating my support on a scale of 1 (worst) to 5 (best)?"
+                )
+            else:
+                logger.info("[route_to_human_agent] User not satisfied, routing to human agent.")
+                return (
+                    "I’m sorry I couldn’t fully address your query.\n"
+                    "Let me connect you with one of our sales team agents for further assistance."
+                )
+            
+        except Exception as e:
+            logger.error(f"[route_to_human_agent] Error occurred: {e}")
+            raise

@@ -3,7 +3,7 @@ from constants import MODEL, OPENAI_API_KEY, PRODUCT_DETAIL_FILE, DESCRIPTION_CO
 from src.utils import read_structured_file, write_structured_data
 import openai
 import json
-from typing import Union, Dict
+from typing import Union, Dict, List
 from src.logging import logging
 from pandas import DataFrame
 import pandas as pd
@@ -12,6 +12,9 @@ logger = logging()
 openai.api_key = OPENAI_API_KEY
 
 class ProductMapper:
+    def __init__(self):
+        logger.info("ProductMapper object instansiated.")
+    
     def do_product_mapping(self, laptop_description: str = '') -> Dict[str, Union[str, int, bool]]:
         """
         This method is used to map the description of the laptop to a dictionary
@@ -124,4 +127,52 @@ class ProductMapper:
 
         except Exception as e:
             logger.error(f"Error occurred in [start_dataframe_product_mapping] method of ProductMapper: {e}")
+            raise
+        
+    
+    def map_the_score(self, mapped_column: List[Dict] = None, user_profile: List[Dict] = None) -> List[Dict]:
+        """ 
+        This method is used to calculate score for the laptop mappings based on user profile.
+
+        Args:
+            mapped_column (List[Dict]): A list of dictionaries where each dictionary contains 
+            attribute-value pairs with values as 'low', 'medium', or 'high'.
+            user_profile (List[Dict]): A list with a single dictionary representing the user’s desired profile.
+
+        Returns:
+            List[Dict]: A list of dictionaries where each key is mapped to 1 if the laptop’s
+            score is greater than or equal to the user profile score, otherwise 0. 
+            Numeric values (like budget) are preserved.
+        """
+        try:
+            logger.info("Starting score mapping for laptop mappings.")
+            score_map = {"low": 1, "medium": 2, "high": 3}
+            result = []
+
+            if not user_profile or len(user_profile) == 0:
+                raise ValueError("User profile must be provided with at least one dictionary.")
+
+            user_pref = user_profile[0]
+
+            for record in mapped_column:
+                scored_record = {}
+                for key, value in record.items():
+                    if isinstance(value, str) and value.lower() in score_map:
+                        mapped_score = score_map[value.lower()]
+                        user_value = user_pref.get(key)
+                        if isinstance(user_value, str) and user_value.lower() in score_map:
+                            user_score = score_map[user_value.lower()]
+                            scored_record[key] = 1 if mapped_score >= user_score else 0
+                        else:
+                            scored_record[key] = 0
+                    else:
+                        # leave numeric or other non-mappable values untouched
+                        scored_record[key] = value
+                result.append(scored_record)
+
+            logger.info("Score mapping completed successfully.")
+            return result
+
+        except Exception as e:
+            logger.error(f"Error occurred in map_the_score: {e}")
             raise

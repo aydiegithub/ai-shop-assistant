@@ -17,6 +17,7 @@ PRODUCT_DETAIL_FILE = 'src/database/laptop_data_mapped.parquet', # 'src/database
 DESCRIPTION_COLUMN = 'Description'
 MAPPED_COLUMN = 'mapped_dictionary'
 MAPPED_DATA_FILE_PATH = 'src/database/laptop_data_mapped.parquet'
+BUDGET_COLUMN = 'Price'
 
 # Cloudflare D1 SQL Database Credentials
 CLOUDFLARE_ACCOUNT_ID = os.getenv('CLOUDFLARE_ACCOUNT_ID')
