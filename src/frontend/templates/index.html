@@ -10,12 +10,37 @@
 <body>
     <!-- Toast notification area for errors -->
     <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Info Drawer for mobile (hidden on desktop) -->
+    <div class="info-drawer" id="infoDrawer" tabindex="-1" aria-modal="true" role="dialog" aria-label="About this demo">
+        <button class="info-drawer-close" id="closeInfoDrawer" aria-label="Close info panel">&times;</button>
+        <div class="info-content">
+            <h2>About this demo</h2>
+            <div class="info-text">
+                <p>This is my portfolio project, this uses OpenAI API.</p>
+                <p>If this demo stops working then my API credit has been exhausted, since I am a college student I can't afford to run this on large scale.</p>
+                <p><strong>For source code visit:</strong> <a href="https://github.com/aydiegithub/ai-shop-assistant.git" target="_blank" rel="noopener noreferrer">github.com/aydiegithub/ai-shop-assistant.git</a></p>
+                <p><strong>Documentation:</strong> <a href="https://aydie.in/llm/ai-shop-assistant-documentation.pdf" target="_blank" rel="noopener noreferrer">aydie.in/llm/ai-shop-assistant-documentation.pdf</a></p>
+                <p><strong>Website:</strong> <a href="https://www.aydie.in" target="_blank" rel="noopener noreferrer">www.aydie.in</a></p>
+                <p><strong>My blogs:</strong> <a href="https://blogs.aydie.in" target="_blank" rel="noopener noreferrer">blogs.aydie.in</a></p>
+                <p><strong>All projects:</strong> <a href="https://aydie.in/projects" target="_blank" rel="noopener noreferrer">aydie.in/projects</a></p>
+                <p><strong>LinkedIn:</strong> <a href="https://linkedin.com/in/aydiemusic" target="_blank" rel="noopener noreferrer">linkedin.com/in/aydiemusic</a></p>
+                <p><strong>Email:</strong> <a href="mailto:developer@aydie.in">developer@aydie.in</a> or <a href="mailto:aditya@aydie.in">aditya@aydie.in</a></p>
+            </div>
+            <!-- Logo section -->
+            <div class="logo-section">
+                <a href="https://www.aydie.in" target="_blank" rel="noopener noreferrer" class="logo-link" aria-label="Visit Aydie website">
+                    <img src="https://aydie.in/assets/img/logo_header_blue.svg" alt="Aydie Logo" class="aydie-logo">
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="info-drawer-backdrop" id="infoDrawerBackdrop"></div>
     
     <!-- Main container -->
     <div class="main-container">
         <div class="app-card">
-            
-            <!-- Left panel: About section -->
+            <!-- Left panel: About section (desktop only) -->
             <div class="info-panel">
                 <div class="info-content">
                     <h2>About this demo</h2>
@@ -30,7 +55,6 @@
                         <p><strong>LinkedIn:</strong> <a href="https://linkedin.com/in/aydiemusic" target="_blank" rel="noopener noreferrer">linkedin.com/in/aydiemusic</a></p>
                         <p><strong>Email:</strong> <a href="mailto:developer@aydie.in">developer@aydie.in</a> or <a href="mailto:aditya@aydie.in">aditya@aydie.in</a></p>
                     </div>
-                    
                     <!-- Logo section -->
                     <div class="logo-section">
                         <a href="https://www.aydie.in" target="_blank" rel="noopener noreferrer" class="logo-link" aria-label="Visit Aydie website">
@@ -42,9 +66,17 @@
             
             <!-- Right panel: Chat interface -->
             <div class="chat-panel">
+                <!-- Mobile hamburger menu button -->
+                <button class="mobile-menu-btn" id="openInfoDrawer" aria-label="Open info panel">
+                    <span class="dash"></span>
+                    <span class="dash"></span>
+                    <span class="dash"></span>
+                </button>
                 <div class="chat-header">
-                    <h1>Shop Assist Bot</h1>
-                    <p style="font-size: 1.01em; font-weight: normal;">Laptop related only since it is a demo.</p>
+                    <div class="chat-title-section">
+                        <h1>Shop Assist Bot</h1>
+                        <p class="demo-subtitle">Laptop related only since it is a demo.</p>
+                    </div>
                     <button id="clear-chat-btn" class="clear-btn" aria-label="Clear conversation">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
@@ -79,7 +111,7 @@
                     <div class="input-container">
                         <textarea 
                             id="message-input" 
-                            placeholder="Type your message here... (Enter to send, Shift+Enter for new line)"
+                            placeholder="Type your message here..."
                             rows="1"
                             aria-label="Message input"
                             required
@@ -100,5 +132,54 @@
             </div>
         </div>
     </div>
+    <script>
+    // Mobile info drawer logic
+    function isMobile() { return window.matchMedia('(max-width: 768px)').matches; }
+    function updateMobileMenuBtn() {
+        const btn = document.getElementById('openInfoDrawer');
+        btn.style.display = isMobile() ? 'flex' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateMobileMenuBtn();
+        window.addEventListener('resize', updateMobileMenuBtn);
+
+        const infoDrawer = document.getElementById('infoDrawer');
+        const openBtn = document.getElementById('openInfoDrawer');
+        const closeBtn = document.getElementById('closeInfoDrawer');
+        const backdrop = document.getElementById('infoDrawerBackdrop');
+        
+        function openDrawer() {
+            infoDrawer.classList.add('open');
+            backdrop.classList.add('show');
+            document.body.classList.add('info-drawer-open');
+            infoDrawer.focus();
+        }
+        
+        function closeDrawer() {
+            infoDrawer.classList.remove('open');
+            backdrop.classList.remove('show');
+            document.body.classList.remove('info-drawer-open');
+        }
+        
+        openBtn.addEventListener('click', function(e){ 
+            e.stopPropagation(); 
+            openDrawer(); 
+        });
+        
+        closeBtn.addEventListener('click', function(e){ 
+            e.stopPropagation(); 
+            closeDrawer(); 
+        });
+        
+        backdrop.addEventListener('click', closeDrawer);
+        
+        document.addEventListener('keydown', function(e){
+            if (e.key === 'Escape' && infoDrawer.classList.contains('open')) {
+                closeDrawer();
+            }
+        });
+    });
+    </script>
 </body>
 </html>

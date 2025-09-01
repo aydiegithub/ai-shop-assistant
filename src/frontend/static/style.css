@@ -151,6 +151,7 @@ body {
     flex-direction: column;
     height: 100%;
     min-height: 0; /* Important for flex child */
+    position: relative;
 }
 
 .chat-header {
@@ -201,6 +202,43 @@ body {
 .clear-btn:focus {
     outline: 2px solid var(--aydie-lime);
     outline-offset: 2px;
+}
+
+/* Mobile menu button - hidden by default */
+.mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 1011;
+    padding: 0;
+    margin: 0;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.mobile-menu-btn:active,
+.mobile-menu-btn:focus {
+    background: #e1e5e9;
+    outline: 2px solid var(--aydie-lime);
+}
+
+.mobile-menu-btn .dash {
+    width: 22px;
+    height: 3px;
+    background: var(--aydie-blue);
+    margin: 2.5px 0;
+    border-radius: 2px;
+    transition: 0.2s;
+    display: block;
 }
 
 /* Messages container */
@@ -322,7 +360,7 @@ body {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--text-secondary);
+    background: var(--aydie-lime);
     animation: typing-bounce 1.5s infinite;
 }
 
@@ -476,6 +514,15 @@ body {
     }
 }
 
+/* Info drawer - hidden by default */
+.info-drawer {
+    display: none;
+}
+
+.info-drawer-backdrop {
+    display: none;
+}
+
 /* Accessibility: Reduced motion */
 @media (prefers-reduced-motion: reduce) {
     * {
@@ -496,50 +543,51 @@ body {
     }
 }
 
+/* Tablet breakpoint */
 @media (max-width: 768px) {
     body {
-        padding: 0.5rem;
+        padding: 0;
+        background-color: var(--bg);
     }
     
     .main-container {
-        height: calc(100vh - 1rem);
+        height: 100vh;
+        min-height: 100vh;
+        padding: 0;
+        max-width: 100vw;
     }
     
     .app-card {
         grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
-        max-height: calc(100vh - 1rem);
+        grid-template-rows: 1fr;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
     }
     
+    /* Hide desktop info panel */
     .info-panel {
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
-        padding: 1.5rem;
-        max-height: 300px;
-        overflow-y: auto;
+        display: none;
     }
     
-    .info-content h2 {
-        font-size: 1.25rem;
-        margin-bottom: 1rem;
+    /* Show mobile menu button */
+    .mobile-menu-btn {
+        display: flex;
     }
     
-    .info-text {
-        font-size: 0.875rem;
-    }
-    
-    .logo-section {
-        padding-top: 1rem;
-        margin-top: 1rem;
-    }
-    
-    .aydie-logo {
-        height: 32px;
+    /* Fullscreen chat */
+    .chat-panel {
+        width: 100vw;
+        height: 100vh;
+        padding-bottom: env(safe-area-inset-bottom, 0);
     }
     
     .chat-header {
-        padding: 1rem 1.5rem 0.75rem;
+        padding: 1rem 1.5rem 0.75rem 4rem;
         align-items: center;
+        min-height: 70px;
     }
     
     .chat-title-section h1 {
@@ -552,10 +600,11 @@ body {
     
     .messages-container {
         padding: 1rem 1.5rem;
+        gap: 0.75rem;
     }
     
     .chat-input-form {
-        padding: 1rem 1.5rem 1.5rem;
+        padding: 1rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom, 0));
     }
     
     .input-container {
@@ -563,7 +612,96 @@ body {
     }
     
     .message {
-        max-width: 95%;
+        max-width: 90%;
+        font-size: 0.95em;
+    }
+    
+    /* Info drawer styles */
+    .info-drawer {
+        display: block;
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: 85vw;
+        max-width: 350px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+        border-right: 1px solid var(--border-color);
+        box-shadow: 2px 0 20px 0 rgba(31, 18, 71, 0.15);
+        z-index: 1001;
+        padding: 3rem 1.25rem 1.25rem;
+        overflow-y: auto;
+        transition: transform 0.3s var(--transition-fast);
+        transform: translateX(-100%);
+        border-radius: 0 18px 18px 0;
+    }
+    
+    .info-drawer.open {
+        transform: translateX(0);
+    }
+    
+    .info-drawer .info-content h2 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .info-drawer .info-text p {
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .info-drawer .logo-section {
+        margin-top: 1.5rem;
+        padding-top: 0.75rem;
+    }
+    
+    .info-drawer .aydie-logo {
+        height: 28px;
+    }
+    
+    .info-drawer-close {
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        color: var(--aydie-blue);
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        z-index: 1010;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        transition: background 0.2s;
+    }
+    
+    .info-drawer-close:hover,
+    .info-drawer-close:focus {
+        background: #e1e5e9;
+        outline: 2px solid var(--aydie-lime);
+    }
+    
+    .info-drawer-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(31, 18, 71, 0.3);
+        z-index: 1000;
+        transition: opacity 0.3s;
+        opacity: 0;
+    }
+    
+    .info-drawer-backdrop.show {
+        display: block;
+        opacity: 1;
+    }
+    
+    body.info-drawer-open {
+        overflow: hidden;
+        touch-action: none;
     }
     
     #toast-container {
@@ -574,20 +712,36 @@ body {
     
     .toast {
         max-width: none;
+        font-size: 0.9rem;
     }
 }
 
+/* Small mobile devices */
 @media (max-width: 480px) {
-    .info-text p {
-        font-size: 0.8rem;
+    .chat-header {
+        padding: 0.75rem 1rem 0.5rem 3.5rem;
+        min-height: 60px;
     }
     
-    .message-content {
-        font-size: 0.875rem;
+    .messages-container {
         padding: 0.75rem 1rem;
     }
     
-    .aydie-logo {
-        height: 28px;
+    .chat-input-form {
+        padding: 0.75rem 1rem calc(1rem + env(safe-area-inset-bottom, 0));
+    }
+    
+    .info-drawer {
+        width: 95vw;
+        max-width: 95vw;
+        padding: 2.5rem 1rem 1rem;
+    }
+    
+    .info-drawer .info-content h2 {
+        font-size: 1.1rem;
+    }
+    
+    .info-drawer .info-text p {
+        font-size: 0.85rem;
     }
 }
