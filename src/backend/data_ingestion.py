@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from src.database.aws_s3_connection import AWSConnection
-from database.aiven_posgresql_update import PostgresDataBaseUpdate
+from src.database.aiven_posgresql_update import PostgresDataBaseUpdate
 from src.constants import S3_FILE_NAME
 from src.logging import logging
 from src.backend.product_mapper import ProductMapper
