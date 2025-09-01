@@ -143,21 +143,20 @@ def feedback():
         data = request.get_json()
         user_message = data.get('message', '').strip()
         messages = data.get('messages', [])
-        # Append user feedback message
+
         messages.append({'role': 'user', 'content': user_message})
 
-        # If the user says "yes", end the chat
+        # If the user says "yes", prompt for rating (don't end yet!)
         if user_message.strip().lower() in ['yes', 'y', 'yeah', 'yep', 'sure', 'of course', 'thanks']:
-            goodbye_message = (
+            rating_prompt = (
                 "Thank you for your interest! I'm glad I could assist you.\n"
-                "Would you mind rating my support on a scale of 1 (worst) to 5 (best)?\n\n"
-                "Program Exited...."
+                "Would you mind rating my support on a scale of 1 (worst) to 5 (best)?"
             )
-            messages.append({'role': 'assistant', 'content': goodbye_message})
+            messages.append({'role': 'assistant', 'content': rating_prompt})
             return jsonify({
-                'message': goodbye_message,
+                'message': rating_prompt,
                 'messages': messages,
-                'state': 'ended'
+                'state': 'awaiting_rating'
             })
         else:
             # Anything else routes to human agent
@@ -168,6 +167,31 @@ def feedback():
                 'messages': messages,
                 'state': 'ended'
             })
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return jsonify({
+            'message': f'Error: {str(e)}',
+            'messages': messages if 'messages' in locals() else [],
+            'state': 'error'
+        }), 500
+
+@app.route('/rate', methods=['POST'])
+def rate():
+    try:
+        data = request.get_json()
+        user_message = data.get('message', '').strip()
+        messages = data.get('messages', [])
+
+        messages.append({'role': 'user', 'content': user_message})
+        # Optionally store the rating somewhere here!
+
+        chat_ended_message = "Thank you for your valuable feedback! Chat ended."
+        messages.append({'role': 'assistant', 'content': chat_ended_message})
+        return jsonify({
+            'message': chat_ended_message,
+            'messages': messages,
+            'state': 'ended'
+        })
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify({

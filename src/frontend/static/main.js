@@ -48,9 +48,10 @@ class ChatApp {
                 state: this.conversationState
             };
 
-            // If waiting for feedback, use feedback endpoint!
             if (this.conversationState === 'awaiting_feedback') {
                 endpoint = '/feedback';
+            } else if (this.conversationState === 'awaiting_rating') {
+                endpoint = '/rate';
             }
 
             const response = await fetch(endpoint, {
@@ -64,7 +65,6 @@ class ChatApp {
             this.messages = data.messages || [];
             this.conversationState = data.state || 'normal';
 
-            // If conversation ended, disable input
             if (this.conversationState === 'ended') {
                 this.messageInput.disabled = true;
                 this.sendBtn.disabled = true;
