@@ -1,13 +1,22 @@
+# Use the AWS Lambda Python 3.9 base image
 FROM public.ecr.aws/lambda/python:3.9
 
+# Set working directory to where Lambda looks for code
 WORKDIR /var/task
 
+# Install system dependencies required by psycopg2
+RUN yum install -y gcc postgresql-devel
+
+# Copy dependency list first (better for caching layers)
 COPY requirements.txt .
 
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy the rest of the application code
 COPY . .
 
+# Build-time arguments (passed from CI/CD or docker build command)
 ARG OPENAI_API_KEY
 ARG GEMINI_API_KEY
 ARG CLOUDFLARE_ACCOUNT_ID
@@ -25,6 +34,7 @@ ARG POSTGRES_HOST
 ARG POSTGRES_PORT
 ARG POSTGRES_TABLE_NAME
 
+# Expose arguments as environment variables inside the container
 ENV OPENAI_API_KEY=${OPENAI_API_KEY}
 ENV GEMINI_API_KEY=${GEMINI_API_KEY}
 ENV CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID}
@@ -42,4 +52,5 @@ ENV POSTGRES_HOST=${POSTGRES_HOST}
 ENV POSTGRES_PORT=${POSTGRES_PORT}
 ENV POSTGRES_TABLE_NAME=${POSTGRES_TABLE_NAME}
 
+# Lambda will run the Flask app exposed as "app.app"
 CMD [ "app.app" ]
