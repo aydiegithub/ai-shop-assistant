@@ -1,8 +1,48 @@
-import os
 import logging as py_logging
-from datetime import datetime
+import sys
 
-class logging:
+# A simple function to get a configured logger
+def logging():
+    """
+    Configures and returns a logger that prints to standard output.
+    This is compatible with AWS Lambda, which captures stdout and sends it to CloudWatch.
+    """
+    # Get the root logger
+    logger = py_logging.getLogger()
+    
+    # This check prevents adding duplicate handlers if the function is called multiple times.
+    if logger.handlers:
+        return logger
+        
+    # Set the logging level to INFO
+    logger.setLevel(py_logging.INFO)
+    
+    # Create a handler that prints log messages to standard output (the console)
+    handler = py_logging.StreamHandler(sys.stdout)
+    
+    # Create a formatter to define the log message structure
+    formatter = py_logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    
+    # Add the configured handler to the logger
+    logger.addHandler(handler)
+    
+    return logger
+
+
+
+
+
+
+
+
+
+# import os
+# import logging as py_logging
+# from datetime import datetime
+
+
+"""class logging:
     def __init__(self, log_dir='logs'):
         root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         self.log_dir = os.path.join(root_dir, log_dir)
@@ -28,4 +68,4 @@ class logging:
         self.logger.error(message)
 
     def debug(self, message):
-        self.logger.debug(message)
+        self.logger.debug(message)"""
