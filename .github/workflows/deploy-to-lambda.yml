@@ -1,0 +1,87 @@
+name: Deploy AI Shop Assistant to AWS Lambda
+
+# This workflow runs on every push to the 'main' branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Step 1: Check out your repository code so the workflow can access it
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Step 2: Configure your AWS credentials using the secrets we stored in GitHub
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+    # Step 3: Log in to Amazon ECR
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    # Step 4: Build the Docker image, tag it, and push it to your ECR repository
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ai-shop-assistant # This must match the ECR repo name from Step 1.3
+        IMAGE_TAG: ${{ github.sha }} # This uses the commit hash for a unique image tag
+        # Pass all secrets to the Docker build process
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        D1_SQL_DATABASE_ID: ${{ secrets.D1_SQL_DATABASE_ID }}
+        D1_SQL_DATABASE_NAME: ${{ secrets.D1_SQL_DATABASE_NAME }}
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+        POSTGRES_DB_NAME: ${{ secrets.POSTGRES_DB_NAME }}
+        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+        POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+        POSTGRES_TABLE_NAME: ${{ secrets.POSTGRES_TABLE_NAME }}
+      run: |
+        # Build the Docker image, passing all secrets as build-time arguments
+        docker build \
+          --build-arg OPENAI_API_KEY=$OPENAI_API_KEY \
+          --build-arg GEMINI_API_KEY=$GEMINI_API_KEY \
+          --build-arg CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID \
+          --build-arg D1_SQL_DATABASE_ID=$D1_SQL_DATABASE_ID \
+          --build-arg D1_SQL_DATABASE_NAME=$D1_SQL_DATABASE_NAME \
+          --build-arg CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN \
+          --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+          --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+          --build-arg AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION \
+          --build-arg S3_BUCKET_NAME=$S3_BUCKET_NAME \
+          --build-arg POSTGRES_DB_NAME=$POSTGRES_DB_NAME \
+          --build-arg POSTGRES_USER=$POSTGRES_USER \
+          --build-arg POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
+          --build-arg POSTGRES_HOST=$POSTGRES_HOST \
+          --build-arg POSTGRES_PORT=$POSTGRES_PORT \
+          --build-arg POSTGRES_TABLE_NAME=$POSTGRES_TABLE_NAME \
+          -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        
+        # Push the image to ECR
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        
+        # Make the image URI available to the next step
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    # Step 5: Update the Lambda function to use the new container image we just pushed
+    - name: Update Lambda function code
+      env:
+        LAMBDA_FUNCTION_NAME: ai-shop-assistant-function # This must match the Lambda function name from Step 1.4
+      run: |
+        aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --image-uri ${{ steps.build-image.outputs.image }}
