@@ -1,56 +1,25 @@
-# Use the AWS Lambda Python 3.9 base image
-FROM public.ecr.aws/lambda/python:3.9
+# Use an official slim Python image
+FROM python:3.9-slim
 
-# Set working directory to where Lambda looks for code
-WORKDIR /var/task
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies required by psycopg2
-RUN yum install -y gcc postgresql-devel
+# Set work directory
+WORKDIR /app
 
-# Copy dependency list first (better for caching layers)
-COPY requirements.txt .
+# Install system dependencies
+RUN apt-get update && apt-get install -y gcc libpq-dev && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
+# Copy app code
 COPY . .
 
-# Build-time arguments (passed from CI/CD or docker build command)
-ARG OPENAI_API_KEY
-ARG GEMINI_API_KEY
-ARG CLOUDFLARE_ACCOUNT_ID
-ARG D1_SQL_DATABASE_ID
-ARG D1_SQL_DATABASE_NAME
-ARG CLOUDFLARE_API_TOKEN
-ARG AWS_ACCESS_KEY_ID
-ARG AWS_SECRET_ACCESS_KEY
-ARG AWS_DEFAULT_REGION
-ARG S3_BUCKET_NAME
-ARG POSTGRES_DB_NAME
-ARG POSTGRES_USER
-ARG POSTGRES_PASSWORD
-ARG POSTGRES_HOST
-ARG POSTGRES_PORT
-ARG POSTGRES_TABLE_NAME
+# Expose port 7860 for HuggingFace Spaces
+EXPOSE 7860
 
-# Expose arguments as environment variables inside the container
-ENV OPENAI_API_KEY=${OPENAI_API_KEY}
-ENV GEMINI_API_KEY=${GEMINI_API_KEY}
-ENV CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID}
-ENV D1_SQL_DATABASE_ID=${D1_SQL_DATABASE_ID}
-ENV D1_SQL_DATABASE_NAME=${D1_SQL_DATABASE_NAME}
-ENV CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
-ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-ENV AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-ENV S3_BUCKET_NAME=${S3_BUCKET_NAME}
-ENV POSTGRES_DB_NAME=${POSTGRES_DB_NAME}
-ENV POSTGRES_USER=${POSTGRES_USER}
-ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-ENV POSTGRES_HOST=${POSTGRES_HOST}
-ENV POSTGRES_PORT=${POSTGRES_PORT}
-ENV POSTGRES_TABLE_NAME=${POSTGRES_TABLE_NAME}
-
-# Lambda will run the Flask app exposed as "app.app"
-CMD [ "app.handler" ]
+# Run the app
+CMD ["python", "app.py"]
