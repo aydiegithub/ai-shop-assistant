@@ -3,14 +3,18 @@ from src.backend.orchestrator import Orchestrator
 import openai
 from src.constants import OPENAI_API_KEY, MODEL
 import re
-
 import sys
 import os
+
+from mangum import Mangum  # NEW for Lambda compatibility
+
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-app = Flask(__name__, 
-           template_folder='src/frontend/templates',
-           static_folder='src/frontend/static')
+app = Flask(
+    __name__,
+    template_folder='src/frontend/templates',
+    static_folder='src/frontend/static'
+)
 
 orch = Orchestrator()
 openai.api_key = OPENAI_API_KEY
@@ -108,7 +112,7 @@ def chat():
                 intent_confirmed_text = orch.dictionary_present_check(assistant_response)
                 recommended_product = orch.start_product_recommendation(input_message=intent_confirmed_text)
                 final_message = (
-                    assistant_response_filtered + 
+                    assistant_response_filtered +
                     ("\n\n" + recommended_product if recommended_product else "") +
                     "\n\nHope I have solved your request. Did this help you? (yes/no)"
                 )
@@ -204,5 +208,4 @@ def rate():
             'state': 'error'
         }), 500
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=True)
+handler = Mangum(app)

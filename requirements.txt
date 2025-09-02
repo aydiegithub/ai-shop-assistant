@@ -47,3 +47,6 @@ cloudflare>=3.0.0,<4
 
 # For SQL
 psycopg2==2.9.10
+
+# For AWS Lambda
+mangum==0.19.0

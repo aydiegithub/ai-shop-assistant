@@ -53,4 +53,4 @@ ENV POSTGRES_PORT=${POSTGRES_PORT}
 ENV POSTGRES_TABLE_NAME=${POSTGRES_TABLE_NAME}
 
 # Lambda will run the Flask app exposed as "app.app"
-CMD [ "app.app" ]
+CMD [ "app.handler" ]
