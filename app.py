@@ -4,6 +4,10 @@ import openai
 from src.constants import OPENAI_API_KEY, MODEL
 import re
 
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+
 app = Flask(__name__, 
            template_folder='src/frontend/templates',
            static_folder='src/frontend/static')
