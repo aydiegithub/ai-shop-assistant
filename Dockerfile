@@ -1,25 +1,15 @@
-# Use an official slim Python image
-FROM python:3.9-slim
-
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Use AWS Lambda Python 3.9 base image
+FROM public.ecr.aws/lambda/python:3.9
 
 # Set work directory
-WORKDIR /app
+WORKDIR ${LAMBDA_TASK_ROOT}
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y gcc libpq-dev && rm -rf /var/lib/apt/lists/*
+# Copy application code
+COPY . ${LAMBDA_TASK_ROOT}
 
-# Install Python dependencies
+# Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app code
-COPY . .
-
-# Expose port 7860 for HuggingFace Spaces
-EXPOSE 7860
-
-# Run the app
-CMD ["python", "app.py"]
+# Lambda entry point
+CMD ["app.lambda_handler"]
