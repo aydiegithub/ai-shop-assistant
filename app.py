@@ -6,12 +6,17 @@ import re
 import sys
 import os
 
+# Ensure current directory is in sys.path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-app = Flask(__name__, 
-           template_folder='src/frontend/templates',
-           static_folder='src/frontend/static')
+# Initialize Flask app
+app = Flask(
+    __name__,
+    template_folder='src/frontend/templates',
+    static_folder='src/frontend/static'
+)
 
+# Initialize Orchestrator and OpenAI API
 orch = Orchestrator()
 openai.api_key = OPENAI_API_KEY
 
@@ -30,6 +35,7 @@ def filter_error_lines(text):
         if not any(re.search(p, line, re.IGNORECASE) for p in unwanted_patterns)
     ).strip()
 
+# Your Flask routes (unchanged)
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -102,13 +108,13 @@ def chat():
         messages.append({'role': 'assistant', 'content': assistant_response})
 
         check_intent_confirmation = orch.intent_confirmation_check(assistant_response)
-        if (isinstance(check_intent_confirmation, dict)):
+        if isinstance(check_intent_confirmation, dict):
             result = check_intent_confirmation.get("result", "").lower()
             if result == "yes":
                 intent_confirmed_text = orch.dictionary_present_check(assistant_response)
                 recommended_product = orch.start_product_recommendation(input_message=intent_confirmed_text)
                 final_message = (
-                    assistant_response_filtered + 
+                    assistant_response_filtered +
                     ("\n\n" + recommended_product if recommended_product else "") +
                     "\n\nHope I have solved your request. Did this help you? (yes/no)"
                 )
@@ -150,7 +156,6 @@ def feedback():
 
         messages.append({'role': 'user', 'content': user_message})
 
-        # If the user says "yes", prompt for rating (don't end yet!)
         if user_message.strip().lower() in ['yes', 'y', 'yeah', 'yep', 'sure', 'of course', 'thanks']:
             rating_prompt = (
                 "Thank you for your interest! I'm glad I could assist you.\n"
@@ -163,7 +168,6 @@ def feedback():
                 'state': 'awaiting_rating'
             })
         else:
-            # Anything else routes to human agent
             assistant_response = orch.route_to_human_agent(user_message)
             messages.append({'role': 'assistant', 'content': assistant_response})
             return jsonify({
@@ -187,7 +191,6 @@ def rate():
         messages = data.get('messages', [])
 
         messages.append({'role': 'user', 'content': user_message})
-        # Optionally store the rating somewhere here!
 
         chat_ended_message = "Thank you for your valuable feedback! Chat ended."
         messages.append({'role': 'assistant', 'content': chat_ended_message})
@@ -204,6 +207,12 @@ def rate():
             'state': 'error'
         }), 500
 
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 7860))
-    app.run(host='0.0.0.0', port=port, debug=True)
+
+
+from aws_lambda_wsgi import handle_request
+def lambda_handler(event, context):
+    """
+    AWS Lambda entry point.
+    Converts API Gateway events to WSGI requests for Flask.
+    """
+    return handle_request(app, event, context)
